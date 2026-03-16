@@ -74,6 +74,7 @@ par(mfrow = c(1,1))
 
 # Sử dụng dữ liệu iris
 data("iris")
+View(iris)
 # Yêu cầu:
 # 1. Vẽ box plot so sánh Petal.Length giữa 3 loài
 # 2. Tô màu khác nhau cho mỗi loài
@@ -82,13 +83,25 @@ data("iris")
 #    - Loài nào có petal dài nhất?
 #    - Loài nào có độ biến thiên lớn nhất?
 #    - Có outliers không? Ở loài nào?
-boxplot(Penta)
+boxplot(Petal.Length ~ Species,
+        data = iris,
+        xlab = "Loài",
+        ylab = "chiều dài cánh hoa",
+        col = c("pink", "lightblue", "lightgreen"))
+
+#Nhận xét từ biểu đồ:
+# - Virginica có độ dài pental lớn nhất
+# - virginica có độ biến thiên lớn nhất
+# - có outliner ở loài setosa và cả versicolor
+
+
+
 # ------------------------------------------------------------------------------
 # Bài tập 4: Scatter Plot
 # ------------------------------------------------------------------------------
 
 # Sử dụng dữ liệu mtcars
-
+data(mtcars)
 # Yêu cầu:
 # 1. Vẽ scatter plot giữa hp (horsepower) và mpg
 # 2. Tô màu các điểm theo số cy-lanh (cyl)
