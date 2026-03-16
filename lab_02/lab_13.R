@@ -108,20 +108,60 @@ data(mtcars)
 # 3. Thêm đường hồi quy tuyến tính
 # 4. Thêm legend giải thích màu
 # 5. Nhận xét về mối quan hệ giữa hp và mpg
+plot(mtcars$hp, mtcars$mpg,
+     main = "Mã Lực (hp) và tiêu thụ nhiên liệu (mpg)",
+     xlab = "Mã lực (hp)",
+     ylab = "MPG (tiêu thụ nhiên liệu)",
+     col = mtcars$cyl,
+     pch = 19,
+     cex = 1.2)
 
+model_hp <- lm(mpg ~ hp, data = mtcars)
+abline(model_hp, col = "red", lwd = 2, lty = 2) #vẽ nét đứt
+legend("topright",
+       title = "Số xi lanh (cyl",
+       legend = c("4 cyl", "6 cyl", "8 cyl"),
+       col = c(4,6,8),
+       pch = 19)
+# - Mối quan hệ nghịch biến tương quan âm giữa hp và mqg
+# - nhóm xe 4 xi-lanh: mã lực yêu thì tiết kiệm xăng
+# - nhóm xe 8 xi lanh: mã lực mạnh thì cực kì hao xăng
+# - nhóm xe 6 xi lanh: mã lực TB thì TB
 # ------------------------------------------------------------------------------
 # Bài tập 5: Nhiều biểu đồ
 # ------------------------------------------------------------------------------
 
 # Sử dụng dữ liệu mtcars
-
+data(mtcars)
 # Yêu cầu:
 # Tạo một figure với 4 biểu đồ (2x2) để phân tích biến hp:
+par(mfrow = c(2,2))
 # 1. Histogram của hp
+hist(mtcars$hp,
+     main = "Phân bố Mã lực",
+     xlab = "Mã lực (hp)",
+     ylab = "Số lượng xe",
+     col = "skyblue")
 # 2. Box plot của hp
+boxplot(mtcars$hp,
+        main = " Tỏng quan mã lực",
+        ylab = "Mã lực",
+        col = "lightgreen")
 # 3. Box plot so sánh hp theo cyl
+boxplot(hp ~ cyl, data = mtcars, 
+        main = "3. Mã lực theo Số xi-lanh", 
+        xlab = "Số xi-lanh (cyl)", 
+        ylab = "Mã lực (hp)", 
+        col = c("pink", "yellow", "cyan"))
 # 4. Scatter plot hp vs mpg
-
+plot(mtcars$hp, mtcars$mpg, 
+     main = "4. Mã lực vs Hao xăng (Scatter)", 
+     xlab = "Mã lực (hp)", 
+     ylab = "Miles per Gallon (MPG)", 
+     pch = 19,        # Điểm tròn đặc
+     col = mtcars$cyl # Tô màu theo xi-lanh
+)
+par(mfrow = c(1, 1))
 # ------------------------------------------------------------------------------
 # Bài tập 6: Tổng hợp
 # ------------------------------------------------------------------------------
@@ -132,17 +172,49 @@ Q2 <- c(150, 140, 160, 155)
 Q3 <- c(180, 170, 190, 185)
 Q4 <- c(200, 210, 195, 220)
 products <- c("Sản phẩm A", "Sản phẩm B", "Sản phẩm C", "Sản phẩm D")
-
+sales_data<- cbind(Q1,Q2,Q3,Q4)
+rownames(sales_data) <- products
+par(mfrow = c(2,2))
 # Yêu cầu:
 # 1. Vẽ grouped bar chart so sánh doanh thu 4 quý
+barplot(sales_data, 
+        beside = TRUE, 
+        main = "1. Doanh thu 4 quý", 
+        col = c("lightblue", "lightgreen", "pink", "orange"),
+        ylab = "Doanh thu",
+        legend = rownames(sales_data),
+        args.legend = list(x = "topleft", cex = 0.7, bty = "n"))
 # 2. Vẽ line plot cho từng sản phẩm qua 4 quý
+plot(1:4, sales_data["Sản phẩm A", ], type = "b", 
+     main = "2. Xu hướng theo quý", xlab = "Quý", ylab = "Doanh thu",
+     col = "lightblue", lwd = 2, pch = 19, ylim = c(80, 250))
+
+
+lines(1:4, sales_data["Sản phẩm B", ], type = "b", col = "lightgreen", lwd = 2, pch = 19)
+lines(1:4, sales_data["Sản phẩm C", ], type = "b", col = "pink", lwd = 2, pch = 19)
+lines(1:4, sales_data["Sản phẩm D", ], type = "b", col = "orange", lwd = 2, pch = 19)
+
+legend("topleft", legend = products, col = c("lightblue", "lightgreen", "pink", "orange"), 
+       lwd = 2, pch = 19, cex = 0.7, bty = "n")
 # 3. Tính tổng doanh thu mỗi quý, vẽ bar chart
+tong_quy <- colSums(sales_data)
+
+pie(tong_quy, 
+    labels = paste(names(tong_quy), "\n", tong_quy), # Dán nhãn kèm giá trị
+    main = "3. Tổng doanh thu mỗi quý", 
+    col = rainbow(4))
 # 4. Tạo figure 2x2 hiển thị:
 #    - Grouped bar chart
 #    - Line plot tất cả sản phẩm
 #    - Pie chart tổng doanh thu mỗi quý
 #    - Bar chart tổng doanh thu mỗi sản phẩm
+tong_sp <- rowSums(sales_data)
 
+barplot(tong_sp, 
+        main = "4. Tổng doanh thu mỗi sản phẩm", 
+        col = "mediumpurple", 
+        ylab = "Tổng doanh thu")
+par(mfrow = c(1, 1))
 # ==============================================================================
 # TÀI LIỆU THAM KHẢO
 # ==============================================================================
