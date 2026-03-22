@@ -1,251 +1,302 @@
-# 1. Giới thiệu Dataset
-# Tên dataset: Cars93
-# Nguồn: Package 'MASS' (mặc định của R)
-# Mô tả: Dữ liệu về 93 mẫu xe ô tô được bán tại Mỹ năm 1993.
-# 
-# Các biến quan trọng (27 biến):
-#   Manufacturer: Hãng sản xuất
-#   Type: Loại xe (Small, Sporty, Compact, Midsize, Large, Van)
-#   Price: Giá xe (Midrange)
-#   MPG.city / MPG.highway: Mức tiêu thụ nhiên liệu (Thành phố / Cao tốc)
-#   AirBags: Tình trạng túi khí
-#   Cylinders: Số xi-lanh (Lưu ý: Có cả chữ "rotary" lọt vào)
-#   Luggage.room: Sức chứa hành lý (Có chứa Missing Values - NA)
-#   Origin: Nguồn gốc xe (USA hoặc non-USA)
-#   ... và nhiều biến khác về thông số kỹ thuật (Weight, Length, v.v.)
-# ==========================================
-
-# 2.1. BƯỚC 1: Load và Khám phá Dữ liệu
-
-# Load thư viện MASS và gọi dataset
-
-library(MASS)       # Chứa dataset Cars93
-# library(stringr)    # Xử lý chuỗi/text chuyên nghiệp
-
-# Load dữ liệu
-data(Cars93)
-df <- Cars93 # Copy ra biến mới để bảo toàn data gốc
-
-# In ra kích thước ban đầu
-cat("Kích thước ban đầu:", nrow(df), "dòng,", ncol(df), "cột\n")
-
 # ==============================================================================
-# PHẦN 2: ĐỊNH NGHĨA CÁC HÀM TỰ TẠO (CUSTOM UTILITY FUNCTIONS)
-# Viết hàm giúp code gọn gàng, có thể tái sử dụng cho các project sau này.
+# ĐỒ ÁN: QUY TRÌNH LÀM SẠCH VÀ CHUẨN HÓA DỮ LIỆU BẤT ĐỘNG SẢN
+# Tên dataset: Ames Housing Dataset
+# Đặc trưng: Hơn 80 biến số và phân loại
+# ==============================================
+# ==============================================================================
+# ĐỒ ÁN: QUY TRÌNH LÀM SẠCH VÀ CHUẨN HÓA DỮ LIỆU BẤT ĐỘNG SẢN
+# Người thực hiện: Đỗ Quốc Khánh (Tùng)
 # ==============================================================================
 
-# 2.1. Hàm tóm tắt Missing Data
-# Trả về một data frame hiển thị tỷ lệ % dữ liệu thiếu của từng cột
-summarize_missing <- function(data) {
-  missing_count <- sapply(data, function(x) sum(is.na(x)))
-  missing_percent <- round((missing_count / nrow(data)) * 100, 2)
-  result <- data.frame(
-    Variable = names(data),
-    Missing_Count = missing_count,
-    Missing_Percent = missing_percent
-  )
-  # Chỉ hiện những cột có dữ liệu thiếu
-  result <- result[result$Missing_Count > 0, ]
-  return(result[order(-result$Missing_Count), ])
-}
-
-# 2.2. Hàm xử lý Outliers (Winsorization)
-# Thay thế các giá trị quá lớn/quá nhỏ bằng giá trị ở ngưỡng phần trăm (percentile) nhất định
-cap_outliers <- function(x, lower_percentile = 0.05, upper_percentile = 0.95) {
-  if (!is.numeric(x)) return(x) # Bỏ qua nếu không phải biến định lượng
-  
-  qnt <- quantile(x, probs = c(lower_percentile, upper_percentile), na.rm = TRUE)
-  capped_x <- x
-  capped_x[x < qnt[1]] <- qnt[1]
-  capped_x[x > qnt[2]] <- qnt[2]
-  
-  return(capped_x)
-}
-
-# 2.3. Hàm tính Mode (Giá trị xuất hiện nhiều nhất) dùng cho biến phân loại
-get_mode <- function(v) {
-  uniqv <- unique(v[!is.na(v)])
-  uniqv[which.max(tabulate(match(v, uniqv)))]
-}
-
-
 # ==============================================================================
-# PHẦN 3: CHUẨN HÓA CẤU TRÚC VÀ TÊN CỘT (STRUCTURAL CLEANING)
+# MÔ TẢ BỘ DỮ LIỆU (DATASET DESCRIPTION)
 # ==============================================================================
-
-# 3.1. Chuẩn hóa tên cột (đưa về chuẩn snake_case)
-# Ví dụ: "MPG.city" thành "mpg_city", "Rear.seat.room" thành "rear_seat_room"
-old_names <- names(df)
-new_names <- tolower(old_names)               # Chuyển hết thành chữ thường
-new_names <- gsub("\\.", "_", new_names)      # Thay dấu chấm bằng dấu gạch dưới
-names(df) <- new_names
-
-# Kiểm tra lại tên cột
-print("Tên cột sau khi chuẩn hóa:")
-print(names(df))
-
-# 3.2. Loại bỏ các cột không mang lại giá trị phân tích tĩnh
-# Ví dụ cột 'make' (kết hợp của manufacturer và model) có thể gây trùng lặp thông tin
-df$make <- NULL 
-
-
+# Tên dataset: Ames Housing Dataset
+# Nguồn: Được thu thập bởi Giáo sư Dean De Cock (Thay thế cho Boston Housing dataset)
+# Mục tiêu phân tích: Làm sạch dữ liệu để chuẩn bị cho các mô hình Machine Learning 
+#                     dự đoán giá bán bất động sản (SalePrice).
+# Quy mô dữ liệu: 2930 quan sát (dòng) x 82 đặc trưng (cột)
+#
+# CÁC NHÓM BIẾN QUAN TRỌNG TỚI QUÁ TRÌNH PHÂN TÍCH:
+#
+# 1. Biến mục tiêu (Target Variable):
+#    - SalePrice: Giá bán thực tế của căn nhà (USD).
+#
+# 2. Biến Không gian & Diện tích (Numerical):
+#    - Lot.Frontage: Chiều dài mặt tiền tiếp giáp với đường (Linear feet).
+#    - Lot.Area: Tổng diện tích lô đất (Square feet).
+#    - Gr.Liv.Area: Diện tích không gian sống trên mặt đất.
+#    - Total.Bsmt.SF: Tổng diện tích tầng hầm.
+#
+# 3. Biến Thời gian (Temporal):
+#    - Year.Built: Năm xây dựng ban đầu.
+#    - Year.Remod.Add: Năm trùng tu/sửa chữa gần nhất.
+#    - Yr.Sold: Năm giao dịch bán nhà.
+#
+# 4. Biến Phân loại Định danh (Nominal Categorical):
+#    - Neighborhood: Tên khu dân cư nằm trong thành phố Ames.
+#    - Bldg.Type: Loại hình nhà ở (1Fam = Nhà đơn lẻ, Twnhs = Nhà phố...).
+#    - House.Style: Kiểu kiến trúc/Số tầng (1Story, 2Story, Split-level...).
+#
+# 5. Biến Phân loại Thứ bậc (Ordinal Categorical):
+#    - Đại diện cho các đánh giá chất lượng và tình trạng (Qual/Cond).
+#    - Ví dụ: Exter.Qual (Ngoại thất), Kitchen.Qual (Bếp), Bsmt.Qual (Hầm).
+#    - Thang đo chuẩn: Ex (Excellent) > Gd (Good) > TA (Typical/Average) 
+#                      > Fa (Fair) > Po (Poor) > None (Không có tiện ích).
 # ==============================================================================
-# PHẦN 4: CHUẨN HÓA CHUỖI VÀ LỖI NHẬP LIỆU (DATA ENTRY ERRORS)
-# ==============================================================================
+# ------------------------------------------------------------------------------
+# BƯỚC 1: LOAD VÀ KHÁM PHÁ DỮ LIỆU BAN ĐẦU
+# ------------------------------------------------------------------------------
 
-# 4.1. Xử lý cột cylinders (Số xi lanh)
-# Cột này bị dính text "rotary" khiến R nhận dạng nó là Factor thay vì Numeric
-table(df$cylinders) # Xem chi tiết
+# 1.1. Đọc dữ liệu từ file csv (Đảm bảo file AmesHousing.csv cùng thư mục)
+housing <- read.csv("lab_02/housing.csv")
 
-# Biến "rotary" (động cơ xoay, không có xi lanh truyền thống) thành NA để xử lý sau
-df$cylinders <- as.character(df$cylinders)
-df$cylinders[df$cylinders == "rotary"] <- NA
+# 1.2. Xem bảng dữ liệu tổng quát
+ View(housing) 
 
-# Chuyển cột về đúng định dạng số
-df$cylinders <- as.numeric(df$cylinders)
+# 1.3. Xem 6 dòng đầu tiên để biết định dạng
+head(housing)
 
-# 4.2. Chuẩn hóa các cột chuỗi (Trim khoảng trắng dư thừa nếu có)
-# Giả sử người nhập liệu vô tình gõ khoảng trắng ở đầu/cuối: " Toyota ", "USA "
-char_cols <- sapply(df, is.character)
-df[char_cols] <- lapply(df[char_cols], function(x) str_trim(x, side = "both"))
+# 1.4. Kiểm tra cấu trúc các biến (Numeric, Character,...)
+str(housing)
+
+# 1.5. Tóm tắt thống kê các biến số
+summary(housing)
+
+# 1.6. Kiểm tra tên của tất cả các cột
+colnames(housing)
+
+# 1.7. Kiểm tra số lượng dòng và cột ban đầu
+dim(housing)
+
+# 1.8. Loại bỏ các cột định danh không mang giá trị dự báo (ID columns)
+# Cột 1 là Order (Số thứ tự), Cột 2 là PID (Mã định danh)
+housing <- housing[, -1] # Xóa cột Order
+housing <- housing[, -1] # Xóa cột PID (sau khi xóa Order thì PID thành cột 1)
+
+# Kiểm tra lại kích thước sau khi xóa
+dim(housing)
+
+# ------------------------------------------------------------------------------
+# BƯỚC 2: XỬ LÝ MISSING DATA (DỮ LIỆU THIẾU)
+# ------------------------------------------------------------------------------
+
+# 2.1. Phát hiện tổng số giá trị thiếu trong toàn bộ dataset
+sum(is.na(housing))
+
+# 2.2. Đếm số dòng có ít nhất một giá trị thiếu
+sum(!complete.cases(housing))
+
+# 2.3. Hiển thị danh sách các cột bị thiếu và số lượng thiếu
+colSums(is.na(housing))[colSums(is.na(housing)) > 0]
+
+# --- XỬ LÝ BIẾN SỐ (NUMERICAL VARIABLES) ---
+
+# 1. Biến Lot.Frontage (Chiều dài mặt tiền)
+summary(housing$Lot.Frontage)
+# Điền NA bằng trung vị (Median) để tránh nhiễu từ outliers
+housing$Lot.Frontage[is.na(housing$Lot.Frontage)] <- median(housing$Lot.Frontage, na.rm = TRUE)
+
+# 2. Biến Mas.Vnr.Area (Diện tích lớp ốp gạch)
+# Nếu thiếu thì coi như căn nhà không có diện tích ốp (bằng 0)
+housing$Mas.Vnr.Area[is.na(housing$Mas.Vnr.Area)] <- 0
+
+# 3. Biến Garage.Yr.Blt (Năm xây gara)
+# Nếu không có gara, ta lấy năm xây nhà để điền vào cho đồng bộ
+housing$Garage.Yr.Blt[is.na(housing$Garage.Yr.Blt)] <- housing$Year.Built[is.na(housing$Garage.Yr.Blt)]
+
+# --- XỬ LÝ BIẾN PHÂN LOẠI (CATEGORICAL VARIABLES) ---
+# Trong dataset này, NA ở nhiều cột tiện ích có nghĩa là "Không có" (None)
+
+# Điền giá trị "None" cho các biến tiện ích chung
+housing$Pool.QC[is.na(housing$Pool.QC)] <- "None"
+housing$Alley[is.na(housing$Alley)] <- "None"
+housing$Fence[is.na(housing$Fence)] <- "None"
+housing$Fireplace.Qu[is.na(housing$Fireplace.Qu)] <- "None"
+housing$Misc.Feature[is.na(housing$Misc.Feature)] <- "None"
+housing$Mas.Vnr.Type[is.na(housing$Mas.Vnr.Type)] <- "None"
+
+# Xử lý nhóm biến Tầng hầm (Basement)
+# NA nghĩa là nhà không có tầng hầm
+housing$Bsmt.Qual[is.na(housing$Bsmt.Qual)] <- "None"
+housing$Bsmt.Cond[is.na(housing$Bsmt.Cond)] <- "None"
+housing$Bsmt.Exposure[is.na(housing$Bsmt.Exposure)] <- "None"
+housing$BsmtFin.Type.1[is.na(housing$BsmtFin.Type.1)] <- "None"
+housing$BsmtFin.Type.2[is.na(housing$BsmtFin.Type.2)] <- "None"
+
+# Xử lý nhóm biến Gara (Garage)
+# NA nghĩa là nhà không có Gara
+housing$Garage.Type[is.na(housing$Garage.Type)] <- "None"
+housing$Garage.Finish[is.na(housing$Garage.Finish)] <- "None"
+housing$Garage.Qual[is.na(housing$Garage.Qual)] <- "None"
+housing$Garage.Cond[is.na(housing$Garage.Cond)] <- "None"
+
+# Xử lý biến Electrical (Hệ thống điện)
+# Chỉ thiếu 1 dòng, điền bằng giá trị xuất hiện nhiều nhất (Mode) là "SBrkr"
+housing$Electrical[is.na(housing$Electrical)] <- "SBrkr"
+
+# Kiểm tra lại xem còn NA không
+sum(is.na(housing))
+
+# ------------------------------------------------------------------------------
+# BƯỚC 3: CHUYỂN ĐỔI BIẾN ĐỊNH DANH (NOMINAL FACTORS)
+# ------------------------------------------------------------------------------
+# Chuyển đổi thủ công từng biến để kiểm soát dữ liệu chặt chẽ
+
+housing$MS.Zoning <- factor(housing$MS.Zoning)
+housing$Street <- factor(housing$Street)
+housing$Alley <- factor(housing$Alley)
+housing$Land.Contour <- factor(housing$Land.Contour)
+housing$Lot.Config <- factor(housing$Lot.Config)
+housing$Neighborhood <- factor(housing$Neighborhood)
+housing$Condition.1 <- factor(housing$Condition.1)
+housing$Condition.2 <- factor(housing$Condition.2)
+housing$Bldg.Type <- factor(housing$Bldg.Type)
+housing$House.Style <- factor(housing$House.Style)
+housing$Roof.Style <- factor(housing$Roof.Style)
+housing$Roof.Matl <- factor(housing$Roof.Matl)
+housing$Exterior.1st <- factor(housing$Exterior.1st)
+housing$Exterior.2nd <- factor(housing$Exterior.2nd)
+housing$Mas.Vnr.Type <- factor(housing$Mas.Vnr.Type)
+housing$Foundation <- factor(housing$Foundation)
+housing$Heating <- factor(housing$Heating)
+housing$Central.Air <- factor(housing$Central.Air)
+housing$Electrical <- factor(housing$Electrical)
+housing$Garage.Type <- factor(housing$Garage.Type)
+housing$Misc.Feature <- factor(housing$Misc.Feature)
+housing$Sale.Type <- factor(housing$Sale.Type)
+housing$Sale.Condition <- factor(housing$Sale.Condition)
+
+# Biến MSSubClass (Mã số loại nhà - thực chất là phân loại chứ không phải số học)
+housing$MSSubClass <- factor(housing$MSSubClass)
+
+# ------------------------------------------------------------------------------
+# BƯỚC 4: CHUYỂN ĐỔI BIẾN CÓ THỨ TỰ (ORDINAL FACTORS)
+# ------------------------------------------------------------------------------
+
+# --- 4.1. Thang đo chất lượng chung ---
+# Thứ tự logic: Poor < Fair < Typical < Good < Excellent
+levels_quality <- c("None", "Po", "Fa", "TA", "Gd", "Ex")
+
+housing$Exter.Qual <- factor(housing$Exter.Qual, 
+                             levels = levels_quality, 
+                             ordered = TRUE)
+
+housing$Exter.Cond <- factor(housing$Exter.Cond, 
+                             levels = levels_quality, 
+                             ordered = TRUE)
+
+housing$Bsmt.Qual <- factor(housing$Bsmt.Qual, 
+                            levels = levels_quality, 
+                            ordered = TRUE)
+
+housing$Bsmt.Cond <- factor(housing$Bsmt.Cond, 
+                            levels = levels_quality, 
+                            ordered = TRUE)
+
+housing$Heating.QC <- factor(housing$Heating.QC, 
+                             levels = levels_quality, 
+                             ordered = TRUE)
+
+housing$Kitchen.Qual <- factor(housing$Kitchen.Qual, 
+                               levels = levels_quality, 
+                               ordered = TRUE)
+
+housing$Fireplace.Qu <- factor(housing$Fireplace.Qu, 
+                               levels = levels_quality, 
+                               ordered = TRUE)
+
+housing$Garage.Qual <- factor(housing$Garage.Qual, 
+                              levels = levels_quality, 
+                              ordered = TRUE)
+
+housing$Garage.Cond <- factor(housing$Garage.Cond, 
+                              levels = levels_quality, 
+                              ordered = TRUE)
+
+housing$Pool.QC <- factor(housing$Pool.QC, 
+                          levels = levels_quality, 
+                          ordered = TRUE)
+
+# --- 4.2. Thang đo hình dáng thửa đất (Lot.Shape) ---
+# Thứ tự: Reg (Đều) > IR1 (Hơi lệch) > IR2 (Lệch) > IR3 (Rất lệch)
+housing$Lot.Shape <- factor(housing$Lot.Shape, 
+                            levels = c("IR3", "IR2", "IR1", "Reg"), 
+                            ordered = TRUE)
+
+# --- 4.3. Thang đo độ dốc địa hình (Land.Slope) ---
+# Thứ tự: Sev (Dốc đứng) < Mod (Hơi dốc) < Gtl (Thoải)
+housing$Land.Slope <- factor(housing$Land.Slope, 
+                             levels = c("Sev", "Mod", "Gtl"), 
+                             ordered = TRUE)
+
+# --- 4.4. Thang đo độ thông thoáng hầm (Bsmt.Exposure) ---
+housing$Bsmt.Exposure <- factor(housing$Bsmt.Exposure, 
+                                levels = c("None", "No", "Mn", "Av", "Gd"), 
+                                ordered = TRUE)
+
+# --- 4.5. Thang đo độ hoàn thiện tầng hầm (BsmtFin.Type) ---
+levels_fin <- c("None", "Unf", "LwQ", "Rec", "BLQ", "ALQ", "GLQ")
+
+housing$BsmtFin.Type.1 <- factor(housing$BsmtFin.Type.1, 
+                                 levels = levels_fin, 
+                                 ordered = TRUE)
+
+housing$BsmtFin.Type.2 <- factor(housing$BsmtFin.Type.2, 
+                                 levels = levels_fin, 
+                                 ordered = TRUE)
+
+# --- 4.6. Thang đo độ hoàn thiện Gara (Garage.Finish) ---
+housing$Garage.Finish <- factor(housing$Garage.Finish, 
+                                levels = c("None", "Unf", "RFn", "Fin"), 
+                                ordered = TRUE)
+
+# --- 4.7. Thang đo tiện ích đường lát mặt (Paved.Drive) ---
+housing$Paved.Drive <- factor(housing$Paved.Drive, 
+                              levels = c("N", "P", "Y"), 
+                              ordered = TRUE)
+
+# ------------------------------------------------------------------------------
+# BƯỚC 5: XỬ LÝ LỖI LOGIC VÀ TẠO ĐẶC TRƯNG MỚI (FEATURE ENGINEERING)
+# ------------------------------------------------------------------------------
+
+# 5.1. Kiểm tra và đồng nhất dữ liệu văn bản (Consistency)
+# Sửa các lỗi nhập liệu sai chính tả ở cột Street (nếu có)
+housing$Street[housing$Street == "Paved"] <- "Pave"
+housing$Street[housing$Street == "PAVE"] <- "Pave"
+housing$Street[housing$Street == "Gravel"] <- "Grvl"
+
+# 5.2. Kiểm tra lỗi năm xây dựng (Year.Built)
+# Đảm bảo không có năm xây dựng nào vô lý (lớn hơn năm hiện tại)
+housing$Year.Built[housing$Year.Built > 2026] <- 2026
+
+# 5.3. Tạo biến Age_at_Sale (Tuổi của ngôi nhà tại thời điểm bán)
+housing$Age_at_Sale <- housing$Yr.Sold - housing$Year.Built
+
+# Nếu có lỗi nhập liệu dẫn đến tuổi âm, set về 0
+housing$Age_at_Sale[housing$Age_at_Sale < 0] <- 0
+
+# 5.4. Tạo biến Total_Living_Area (Tổng diện tích sống: Hầm + Các tầng)
+housing$Total_Living_Area <- housing$Gr.Liv.Area + housing$Total.Bsmt.SF
+
+# ------------------------------------------------------------------------------
+# BƯỚC 6: KIỂM TRA CUỐI CÙNG VÀ LƯU KẾT QUẢ
+# ------------------------------------------------------------------------------
+
+# 6.1. Kiểm tra xem còn dòng nào chứa NA không
+sum(!complete.cases(housing))
+
+# 6.2. Xem cấu trúc dữ liệu sau khi đã làm sạch toàn bộ
+str(housing)
+
+# 6.3. Tóm tắt thống kê lần cuối
+summary(housing)
+
+# 6.4. Lưu dữ liệu đã làm sạch ra file CSV mới
+write.csv(housing, "AmesHousing_Cleaned.csv", row.names = FALSE)
+
+# 6.5. Lưu định dạng RData để giữ nguyên các cấu trúc Factor và Ordered Factor
+save(housing, file = "AmesHousing_InR.RData")
 
 
-# ==============================================================================
-# PHẦN 5: XỬ LÝ MISSING DATA (ADVANCED IMPUTATION)
-# Thay vì điền Mean/Median cho toàn bộ, ta điền theo nhóm (Grouped Imputation)
-# ==============================================================================
 
-# Kiểm tra tình trạng Missing hiện tại
-print("Báo cáo Missing Data trước khi xử lý:")
-print(summarize_missing(df))
-
-# 5.1. Xử lý missing cột 'luggage_room' (Sức chứa hành lý)
-# Lý do thiếu: Xe Van hoặc xe tải nhỏ không có cốp kín.
-# Giải pháp: Gán giá trị 0 cho những xe dạng "Van", "Sporty" không có dữ liệu
-missing_luggage <- is.na(df$luggage_room)
-df$luggage_room[missing_luggage & df$type %in% c("Van", "Sporty")] <- 0
-
-# Nếu vẫn còn thiếu ở các dòng xe khác, điền bằng Median của NHÓM XE (Type) đó
-types <- unique(df$type)
-for (t in types) {
-  group_median <- median(df$luggage_room[df$type == t], na.rm = TRUE)
-  condition <- is.na(df$luggage_room) & df$type == t
-  df$luggage_room[condition] <- group_median
-}
-
-# 5.2. Xử lý missing cột 'rear_seat_room' (Không gian ghế sau)
-# Điền bằng giá trị Mean của cùng loại xe (Type)
-for (t in types) {
-  group_mean <- mean(df$rear_seat_room[df$type == t], na.rm = TRUE)
-  condition <- is.na(df$rear_seat_room) & df$type == t
-  df$rear_seat_room[condition] <- round(group_mean, 1) # Làm tròn 1 chữ số
-}
-
-# 5.3. Xử lý missing cột 'cylinders' (Vừa tạo ra ở Phần 4.1)
-# Động cơ rotary thường tương đương sức mạnh máy 4 hoặc 6 xi lanh. Ta điền bằng Mode.
-df$cylinders[is.na(df$cylinders)] <- get_mode(df$cylinders)
-
-# Kiểm tra lại xem đã sạch NA chưa
-cat("\nSố lượng NA còn lại trong toàn bộ dataset:", sum(is.na(df)), "\n")
-
-
-# ==============================================================================
-# PHẦN 6: CHUYỂN ĐỔI BIẾN PHÂN LOẠI (CATEGORICAL ENCODING)
-# ==============================================================================
-
-# 6.1. Biến 'origin' (Nguồn gốc xe) -> Factor có thứ tự hoặc đổi nhãn
-df$origin <- factor(df$origin, 
-                    levels = c("USA", "non-USA"),
-                    labels = c("Domestic", "Imported"))
-
-# 6.2. Biến 'type' (Loại xe) -> Ordered Factor (Biến có thứ tự từ nhỏ đến lớn)
-# Sắp xếp logic theo kích thước xe trung bình
-df$type <- factor(df$type, 
-                  levels = c("Small", "Sporty", "Compact", "Midsize", "Large", "Van"),
-                  ordered = TRUE)
-
-# 6.3. Biến 'airbags' (Túi khí) -> Rút gọn levels
-df$airbags <- factor(df$airbags,
-                     levels = c("Driver & Passenger", "Driver only", "None"),
-                     labels = c("Both", "Driver_Only", "None"))
-
-# 6.4. Biến 'drive_train' (Hệ dẫn động) -> Rút gọn tên cho chuẩn code
-df$drive_train <- factor(df$drive_train,
-                         levels = c("4WD", "Front", "Rear"))
-
-# 6.5. Tự động hóa chuyển Factor cho các biến Character còn lại (như Manufacturer, Model)
-# Tìm tất cả các cột dạng character và chuyển sang factor
-char_cols <- sapply(df, is.character)
-df[char_cols] <- lapply(df[char_cols], factor)
-
-
-# ==============================================================================
-# PHẦN 7: KIỂM SOÁT NGOẠI LỆ (OUTLIERS TREATMENT)
-# Sử dụng hàm cap_outliers đã viết ở phần 2
-# ==============================================================================
-
-# Chọn các biến định lượng (Numeric) liên tục có khả năng chứa ngoại lệ lớn
-numeric_vars_to_cap <- c("price", "min_price", "max_price", "horsepower", "rev_per_mile")
-
-# Áp dụng hàm cap_outliers qua lapply
-df[numeric_vars_to_cap] <- lapply(df[numeric_vars_to_cap], cap_outliers, 
-                                  lower_percentile = 0.05, 
-                                  upper_percentile = 0.95)
-
-# Lưu ý: Việc Cap này giúp các mô hình Machine Learning sau này ổn định hơn, 
-# không bị nhiễu bởi những chiếc xe có giá hoặc sức ngựa quá cao/thấp một cách vô lý.
-
-
-# ==============================================================================
-# PHẦN 8: KỸ THUẬT ĐẶC TRƯNG (FEATURE ENGINEERING)
-# Tạo ra các biến mới có giá trị phân tích cao hơn
-# ==============================================================================
-
-# 8.1. Tạo biến 'avg_mpg' (Tiêu thụ nhiên liệu trung bình)
-# Kết hợp mức tiêu thụ nội thành và cao tốc (giả định chạy 55% nội thành, 45% cao tốc)
-df$avg_mpg <- round((df$mpg_city * 0.55) + (df$mpg_highway * 0.45), 2)
-
-# 8.2. Phân loại mức giá xe (Price_Category) thông qua kỹ thuật Binning
-# Chia đều mức giá thành 3 nhóm dựa trên hàm quantile
-price_breaks <- quantile(df$price, probs = c(0, 0.33, 0.66, 1), na.rm = TRUE)
-df$price_category <- cut(df$price, 
-                         breaks = price_breaks, 
-                         labels = c("Budget", "Standard", "Premium"),
-                         include.lowest = TRUE)
-
-# 8.3. Tạo biến tỷ lệ Sức mạnh trên Trọng lượng (Power_to_Weight Ratio)
-# Đặc trưng cực kỳ quan trọng để dự đoán độ bốc của xe (Horsepower / Weight)
-df$power_to_weight <- round(df$horsepower / df$weight, 4)
-
-# 8.4. Nhóm hóa Hộp số (Manual Transmission Availability)
-# Cột man_trans_avail đang là Yes/No, chuyển thành biến nhị phân 1/0
-df$is_manual_avail <- ifelse(df$man_trans_avail == "Yes", 1, 0)
-
-
-# ==============================================================================
-# PHẦN 9: SANITY CHECKS VÀ XUẤT DỮ LIỆU
-# Bước cuối cùng để đảm bảo pipeline chạy đúng và không sinh ra lỗi ẩn
-# ==============================================================================
-
-# 9.1. Kiểm tra cấu trúc cuối cùng
-print("Cấu trúc Data Frame sau khi Clean:")
-str(df)
-
-# 9.2. Assertions (Kiểm tra bắt buộc)
-# Dừng script và báo lỗi nếu dữ liệu vẫn còn NA
-if(sum(is.na(df)) > 0) {
-  warning("CẢNH BÁO: Dữ liệu vẫn còn chứa NA. Hãy kiểm tra lại Pipeline!")
-} else {
-  print("THÀNH CÔNG: Dữ liệu đã sạch bóng Missing Values.")
-}
-
-# 9.3. Xóa các biến tạm trong môi trường làm việc để giải phóng RAM (Best practice)
-rm(char_cols, missing_luggage, new_names, old_names, t, types, 
-   group_median, group_mean, condition, numeric_vars_to_cap, price_breaks)
-
-# 9.4. Xuất dữ liệu đã làm sạch
-# Lưu dưới dạng file CSV sẵn sàng cho phân tích/Machine Learning
-# write.csv(df, "cars93_fully_cleaned_engineered.csv", row.names = FALSE)
-
-print("PIPELINE HOÀN TẤT!")
-# ===================== KẾT THÚC SCRIPT ========================================
