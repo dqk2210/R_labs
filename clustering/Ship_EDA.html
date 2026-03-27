@@ -1,0 +1,2742 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Shipping Performance Analysis" />
+
+<meta name="date" content="2026-03-25" />
+
+<title>Ship Performance Dataset — EDA for Clustering</title>
+
+<script src="Ship_EDA_files/header-attrs-2.30/header-attrs.js"></script>
+<script src="Ship_EDA_files/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="Ship_EDA_files/bootstrap-3.3.5/css/flatly.min.css" rel="stylesheet" />
+<script src="Ship_EDA_files/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="Ship_EDA_files/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="Ship_EDA_files/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="Ship_EDA_files/jqueryui-1.13.2/jquery-ui.min.js"></script>
+<link href="Ship_EDA_files/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="Ship_EDA_files/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="Ship_EDA_files/navigation-1.1/tabsets.js"></script>
+<script src="Ship_EDA_files/navigation-1.1/codefolding.js"></script>
+<script src="Ship_EDA_files/kePrint-0.0.1/kePrint.js"></script>
+<link href="Ship_EDA_files/lightable-0.0.1/lightable.css" rel="stylesheet" />
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+
+
+<style type="text/css">
+  code {
+    white-space: pre;
+  }
+  .sourceCode {
+    overflow: visible;
+  }
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  background-color: #f8f8f8; }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ef2929; } /* Alert */
+code span.an { color: #8f5902; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #c4a000; } /* Attribute */
+code span.bn { color: #0000cf; } /* BaseN */
+code span.cf { color: #204a87; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4e9a06; } /* Char */
+code span.cn { color: #000000; } /* Constant */
+code span.co { color: #8f5902; font-style: italic; } /* Comment */
+code span.cv { color: #8f5902; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #8f5902; font-weight: bold; font-style: italic; } /* Documentation */
+code span.dt { color: #204a87; } /* DataType */
+code span.dv { color: #0000cf; } /* DecVal */
+code span.er { color: #a40000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #0000cf; } /* Float */
+code span.fu { color: #000000; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #8f5902; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #204a87; font-weight: bold; } /* Keyword */
+code span.op { color: #ce5c00; font-weight: bold; } /* Operator */
+code span.ot { color: #8f5902; } /* Other */
+code span.pp { color: #8f5902; font-style: italic; } /* Preprocessor */
+code span.sc { color: #000000; } /* SpecialChar */
+code span.ss { color: #4e9a06; } /* SpecialString */
+code span.st { color: #4e9a06; } /* String */
+code span.va { color: #000000; } /* Variable */
+code span.vs { color: #4e9a06; } /* VerbatimString */
+code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warning */
+
+.sourceCode .row {
+  width: 100%;
+}
+.sourceCode {
+  overflow-x: auto;
+}
+.code-folding-btn {
+  margin-right: -30px;
+}
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div id="header">
+
+<div class="btn-group pull-right float-right">
+<button type="button" class="btn btn-default btn-xs btn-secondary btn-sm dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu dropdown-menu-right" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">Ship Performance Dataset — EDA for Clustering</h1>
+<h4 class="author">Shipping Performance Analysis</h4>
+<h4 class="date">2026-03-25</h4>
+
+</div>
+
+
+<hr />
+<div id="libraries" class="section level1" number="1">
+<h1 number="1"><span class="header-section-number">1</span> Libraries</h1>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(GGally)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(corrplot)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(gridExtra)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(skimr)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(knitr)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(kableExtra)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(scales)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggridges)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(viridis)</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(RColorBrewer)</span></code></pre></div>
+<hr />
+</div>
+<div id="data-loading-overview" class="section level1" number="2">
+<h1 number="2"><span class="header-section-number">2</span> 1. Data Loading &amp; Overview</h1>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">&quot;Ship_Performance_Dataset.csv&quot;</span>, <span class="at">stringsAsFactors =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Parse date</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>df<span class="sc">$</span>Date <span class="ot">&lt;-</span> <span class="fu">as.Date</span>(df<span class="sc">$</span>Date)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert categoricals to factors</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>cat_cols <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;Ship_Type&quot;</span>, <span class="st">&quot;Route_Type&quot;</span>, <span class="st">&quot;Engine_Type&quot;</span>,</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>              <span class="st">&quot;Maintenance_Status&quot;</span>, <span class="st">&quot;Weather_Condition&quot;</span>)</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>df[cat_cols] <span class="ot">&lt;-</span> <span class="fu">lapply</span>(df[cat_cols], as.factor)</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Ordered factor for Maintenance_Status</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>df<span class="sc">$</span>Maintenance_Status <span class="ot">&lt;-</span> <span class="fu">factor</span>(df<span class="sc">$</span>Maintenance_Status,</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>                                <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">&quot;Good&quot;</span>, <span class="st">&quot;Fair&quot;</span>, <span class="st">&quot;Critical&quot;</span>),</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>                                <span class="at">ordered =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(df)</span></code></pre></div>
+<pre><code>## [1] 2736   18</code></pre>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(df)</span></code></pre></div>
+<pre><code>## &#39;data.frame&#39;:    2736 obs. of  18 variables:
+##  $ Date                   : Date, format: &quot;2023-06-04&quot; &quot;2023-06-11&quot; ...
+##  $ Ship_Type              : Factor w/ 5 levels &quot;Bulk Carrier&quot;,..: 2 3 2 1 3 3 3 2 4 2 ...
+##  $ Route_Type             : Factor w/ 5 levels &quot;Coastal&quot;,&quot;Long-haul&quot;,..: 3 4 2 5 5 2 5 4 1 2 ...
+##  $ Engine_Type            : Factor w/ 4 levels &quot;Diesel&quot;,&quot;Heavy Fuel Oil (HFO)&quot;,..: 2 4 1 4 1 2 2 1 2 1 ...
+##  $ Maintenance_Status     : Ord.factor w/ 3 levels &quot;Good&quot;&lt;&quot;Fair&quot;&lt;..: 3 1 2 2 2 2 3 3 1 2 ...
+##  $ Speed_Over_Ground_knots: num  12.6 10.4 20.7 21.1 13.7 ...
+##  $ Engine_Power_kW        : num  2063 1796 1649 915 1090 ...
+##  $ Distance_Traveled_nm   : num  1031 1060 659 1127 1445 ...
+##  $ Draft_meters           : num  14.13 14.65 7.2 11.79 9.73 ...
+##  $ Weather_Condition      : Factor w/ 4 levels &quot;Calm&quot;,&quot;Moderate&quot;,..: 2 4 2 2 2 4 4 2 2 1 ...
+##  $ Cargo_Weight_tons      : num  1959 162 178 1737 261 ...
+##  $ Operational_Cost_USD   : num  483832 483388 448543 261350 287718 ...
+##  $ Revenue_per_Voyage_USD : num  292183 883766 394019 87551 676121 ...
+##  $ Turnaround_Time_hours  : num  25.9 63.2 49.4 22.4 64.2 ...
+##  $ Efficiency_nm_per_kWh  : num  1.455 0.29 0.5 0.703 1.331 ...
+##  $ Seasonal_Impact_Score  : num  1.416 0.886 1.406 1.371 0.583 ...
+##  $ Weekly_Voyage_Count    : int  1 6 9 1 8 7 3 6 8 2 ...
+##  $ Average_Load_Percentage: num  93.8 93.9 96.2 66.2 80 ...</code></pre>
+<hr />
+</div>
+<div id="feature-catalogue" class="section level1" number="3">
+<h1 number="3"><span class="header-section-number">3</span> 2. Feature Catalogue</h1>
+<p>The table below maps every column to its role, data type, and description.</p>
+<table class="table table-striped table-hover table-condensed" style="font-size: 12px; margin-left: auto; margin-right: auto;">
+<caption style="font-size: initial !important;">
+Feature Catalogue — Ship Performance Dataset
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+Column
+</th>
+<th style="text-align:left;">
+Type
+</th>
+<th style="text-align:left;">
+Data_Type
+</th>
+<th style="text-align:left;">
+Description
+</th>
+<th style="text-align:left;">
+Clustering_Role
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Date
+</td>
+<td style="text-align:left;">
+Temporal
+</td>
+<td style="text-align:left;">
+Date
+</td>
+<td style="text-align:left;">
+Weekly observation date (2023-06-04 onwards)
+</td>
+<td style="text-align:left;font-weight: bold;color: steelblue !important;">
+Drop (not a performance feature)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Ship_Type
+</td>
+<td style="text-align:left;">
+Categorical
+</td>
+<td style="text-align:left;">
+Factor
+</td>
+<td style="text-align:left;">
+Type of vessel: Container Ship, Fish Carrier, Bulk Carrier, None
+</td>
+<td style="text-align:left;font-weight: bold;color: steelblue !important;">
+Segment descriptor (post-cluster interpretation)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Route_Type
+</td>
+<td style="text-align:left;">
+Categorical
+</td>
+<td style="text-align:left;">
+Factor
+</td>
+<td style="text-align:left;">
+Route category: Coastal, Short-haul, Long-haul, Transoceanic, None
+</td>
+<td style="text-align:left;font-weight: bold;color: steelblue !important;">
+Segment descriptor (post-cluster interpretation)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Engine_Type
+</td>
+<td style="text-align:left;">
+Categorical
+</td>
+<td style="text-align:left;">
+Factor
+</td>
+<td style="text-align:left;">
+Propulsion fuel/system: Diesel, HFO, Steam Turbine
+</td>
+<td style="text-align:left;font-weight: bold;color: steelblue !important;">
+Segment descriptor (post-cluster interpretation)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Maintenance_Status
+</td>
+<td style="text-align:left;">
+Categorical
+</td>
+<td style="text-align:left;">
+Factor (Ordinal)
+</td>
+<td style="text-align:left;">
+Maintenance health: Good &lt; Fair &lt; Critical
+</td>
+<td style="text-align:left;font-weight: bold;color: steelblue !important;">
+Include as ordinal-encoded feature
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Speed_Over_Ground_knots
+</td>
+<td style="text-align:left;">
+Categorical
+</td>
+<td style="text-align:left;">
+Factor
+</td>
+<td style="text-align:left;">
+Sea/weather state during voyage: Moderate, Rough, (implied Calm)
+</td>
+<td style="text-align:left;font-weight: bold;color: steelblue !important;">
+Include as ordinal-encoded feature
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Engine_Power_kW
+</td>
+<td style="text-align:left;">
+Numerical
+</td>
+<td style="text-align:left;">
+Numeric
+</td>
+<td style="text-align:left;">
+Speed Over Ground in knots
+</td>
+<td style="text-align:left;font-weight: bold;color: darkgreen !important;">
+Core clustering feature
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Distance_Traveled_nm
+</td>
+<td style="text-align:left;">
+Numerical
+</td>
+<td style="text-align:left;">
+Numeric
+</td>
+<td style="text-align:left;">
+Engine output in kilowatts
+</td>
+<td style="text-align:left;font-weight: bold;color: darkgreen !important;">
+Core clustering feature
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Draft_meters
+</td>
+<td style="text-align:left;">
+Numerical
+</td>
+<td style="text-align:left;">
+Numeric
+</td>
+<td style="text-align:left;">
+Distance sailed per voyage in nautical miles
+</td>
+<td style="text-align:left;font-weight: bold;color: darkgreen !important;">
+Core clustering feature
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Weather_Condition
+</td>
+<td style="text-align:left;">
+Numerical
+</td>
+<td style="text-align:left;">
+Numeric
+</td>
+<td style="text-align:left;">
+Vessel draught depth in metres (proxy for cargo load)
+</td>
+<td style="text-align:left;font-weight: bold;color: darkgreen !important;">
+Core clustering feature
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Cargo_Weight_tons
+</td>
+<td style="text-align:left;">
+Numerical
+</td>
+<td style="text-align:left;">
+Numeric
+</td>
+<td style="text-align:left;">
+Total cargo carried in metric tonnes
+</td>
+<td style="text-align:left;font-weight: bold;color: darkgreen !important;">
+Core clustering feature
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Operational_Cost_USD
+</td>
+<td style="text-align:left;">
+Numerical
+</td>
+<td style="text-align:left;">
+Numeric
+</td>
+<td style="text-align:left;">
+Total operating cost per voyage in USD
+</td>
+<td style="text-align:left;font-weight: bold;color: darkgreen !important;">
+Core clustering feature
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Revenue_per_Voyage_USD
+</td>
+<td style="text-align:left;">
+Numerical
+</td>
+<td style="text-align:left;">
+Numeric
+</td>
+<td style="text-align:left;">
+Revenue generated per voyage in USD
+</td>
+<td style="text-align:left;font-weight: bold;color: darkgreen !important;">
+Core clustering feature
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Turnaround_Time_hours
+</td>
+<td style="text-align:left;">
+Numerical
+</td>
+<td style="text-align:left;">
+Numeric
+</td>
+<td style="text-align:left;">
+Time spent in port / turnaround in hours
+</td>
+<td style="text-align:left;font-weight: bold;color: darkgreen !important;">
+Core clustering feature
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Efficiency_nm_per_kWh
+</td>
+<td style="text-align:left;">
+Numerical
+</td>
+<td style="text-align:left;">
+Numeric
+</td>
+<td style="text-align:left;">
+Fuel efficiency: nautical miles per kWh consumed
+</td>
+<td style="text-align:left;font-weight: bold;color: darkgreen !important;">
+Core clustering feature
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Seasonal_Impact_Score
+</td>
+<td style="text-align:left;">
+Numerical
+</td>
+<td style="text-align:left;">
+Numeric
+</td>
+<td style="text-align:left;">
+Score reflecting seasonal demand / environmental impact (0-2)
+</td>
+<td style="text-align:left;font-weight: bold;color: darkgreen !important;">
+Core clustering feature
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Weekly_Voyage_Count
+</td>
+<td style="text-align:left;">
+Numerical
+</td>
+<td style="text-align:left;">
+Integer
+</td>
+<td style="text-align:left;">
+Number of voyages completed in the week
+</td>
+<td style="text-align:left;font-weight: bold;color: darkgreen !important;">
+Core clustering feature
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Average_Load_Percentage
+</td>
+<td style="text-align:left;">
+Numerical
+</td>
+<td style="text-align:left;">
+Numeric
+</td>
+<td style="text-align:left;">
+Percentage of maximum cargo capacity used
+</td>
+<td style="text-align:left;font-weight: bold;color: darkgreen !important;">
+Core clustering feature
+</td>
+</tr>
+</tbody>
+</table>
+<hr />
+</div>
+<div id="clustering-context-target-discussion" class="section level1" number="4">
+<h1 number="4"><span class="header-section-number">4</span> 3. Clustering Context: Target Discussion</h1>
+<blockquote>
+<p><strong>This is an unsupervised clustering problem — there is no pre-labelled target variable.</strong></p>
+</blockquote>
+<div id="what-we-are-trying-to-find" class="section level2" number="4.1">
+<h2 number="4.1"><span class="header-section-number">4.1</span> What we are trying to find</h2>
+<p>We want to discover <strong>natural performance archetypes</strong> among voyages/ships. Each cluster will represent a group of observations that are similar across multiple performance dimensions simultaneously.</p>
+</div>
+<div id="candidate-clustering-dimensions" class="section level2" number="4.2">
+<h2 number="4.2"><span class="header-section-number">4.2</span> Candidate clustering dimensions</h2>
+<table>
+<colgroup>
+<col width="52%" />
+<col width="47%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Dimension</th>
+<th>Features</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Operational efficiency</strong></td>
+<td><code>Efficiency_nm_per_kWh</code>, <code>Speed_Over_Ground_knots</code>, <code>Distance_Traveled_nm</code></td>
+</tr>
+<tr class="even">
+<td><strong>Economic performance</strong></td>
+<td><code>Revenue_per_Voyage_USD</code>, <code>Operational_Cost_USD</code>, <code>Average_Load_Percentage</code></td>
+</tr>
+<tr class="odd">
+<td><strong>Engine &amp; power</strong></td>
+<td><code>Engine_Power_kW</code>, <code>Weekly_Voyage_Count</code></td>
+</tr>
+<tr class="even">
+<td><strong>Load &amp; cargo</strong></td>
+<td><code>Cargo_Weight_tons</code>, <code>Draft_meters</code></td>
+</tr>
+<tr class="odd">
+<td><strong>Operational context</strong></td>
+<td><code>Turnaround_Time_hours</code>, <code>Seasonal_Impact_Score</code></td>
+</tr>
+<tr class="even">
+<td><strong>Risk / condition</strong></td>
+<td><code>Maintenance_Status</code> (encoded), <code>Weather_Condition</code> (encoded)</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="derived-kpi-of-interest-post-clustering" class="section level2" number="4.3">
+<h2 number="4.3"><span class="header-section-number">4.3</span> Derived KPI of interest (post-clustering)</h2>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> df <span class="sc">%&gt;%</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">Profit_USD           =</span> Revenue_per_Voyage_USD <span class="sc">-</span> Operational_Cost_USD,</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">Profit_Margin        =</span> Profit_USD <span class="sc">/</span> Revenue_per_Voyage_USD,</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">Cost_per_nm          =</span> Operational_Cost_USD <span class="sc">/</span> Distance_Traveled_nm,</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">Revenue_per_ton      =</span> Revenue_per_Voyage_USD <span class="sc">/</span> (Cargo_Weight_tons <span class="sc">+</span> <span class="dv">1</span>),</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">Power_per_knot       =</span> Engine_Power_kW <span class="sc">/</span> Speed_Over_Ground_knots</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div>
+<hr />
+</div>
+</div>
+<div id="data-quality-assessment" class="section level1" number="5">
+<h1 number="5"><span class="header-section-number">5</span> 4. Data Quality Assessment</h1>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Missing values</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>missing_df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">Column  =</span> <span class="fu">names</span>(df),</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">Missing =</span> <span class="fu">colSums</span>(<span class="fu">is.na</span>(df)),</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">Pct     =</span> <span class="fu">round</span>(<span class="fu">colSums</span>(<span class="fu">is.na</span>(df)) <span class="sc">/</span> <span class="fu">nrow</span>(df) <span class="sc">*</span> <span class="dv">100</span>, <span class="dv">2</span>)</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>) <span class="sc">%&gt;%</span> <span class="fu">filter</span>(Missing <span class="sc">&gt;</span> <span class="dv">0</span>)</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">nrow</span>(missing_df) <span class="sc">==</span> <span class="dv">0</span>) {</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;No missing values found in any column.</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable</span>(missing_df) <span class="sc">%&gt;%</span> <span class="fu">kable_styling</span>(<span class="at">bootstrap_options =</span> <span class="st">&quot;striped&quot;</span>)</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<table class="table table-striped" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:left;">
+Column
+</th>
+<th style="text-align:right;">
+Missing
+</th>
+<th style="text-align:right;">
+Pct
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Maintenance_Status
+</td>
+<td style="text-align:left;">
+Maintenance_Status
+</td>
+<td style="text-align:right;">
+136
+</td>
+<td style="text-align:right;">
+4.97
+</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Duplicate rows:&quot;</span>, <span class="fu">sum</span>(<span class="fu">duplicated</span>(df)), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
+<pre><code>## Duplicate rows: 0</code></pre>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Total observations:&quot;</span>, <span class="fu">nrow</span>(df), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
+<pre><code>## Total observations: 2736</code></pre>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Date range:&quot;</span>, <span class="fu">format</span>(<span class="fu">min</span>(df<span class="sc">$</span>Date)), <span class="st">&quot;to&quot;</span>, <span class="fu">format</span>(<span class="fu">max</span>(df<span class="sc">$</span>Date)), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
+<pre><code>## Date range: 2023-06-04 to 2024-06-30</code></pre>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Numeric summary</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>num_cols <span class="ot">&lt;-</span> df <span class="sc">%&gt;%</span> <span class="fu">select</span>(<span class="fu">where</span>(is.numeric)) <span class="sc">%&gt;%</span> <span class="fu">select</span>(<span class="sc">-</span><span class="fu">starts_with</span>(<span class="st">&quot;Profit&quot;</span>), <span class="sc">-</span><span class="fu">starts_with</span>(<span class="st">&quot;Cost_per&quot;</span>), <span class="sc">-</span><span class="fu">starts_with</span>(<span class="st">&quot;Revenue_per_ton&quot;</span>), <span class="sc">-</span><span class="fu">starts_with</span>(<span class="st">&quot;Power_per&quot;</span>)) <span class="sc">%&gt;%</span> <span class="fu">names</span>()</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>df <span class="sc">%&gt;%</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="fu">all_of</span>(num_cols)) <span class="sc">%&gt;%</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">skim</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable</span>(<span class="at">caption =</span> <span class="st">&quot;Descriptive Statistics — Numerical Features&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable_styling</span>(<span class="at">bootstrap_options =</span> <span class="fu">c</span>(<span class="st">&quot;striped&quot;</span>,<span class="st">&quot;hover&quot;</span>), <span class="at">full_width =</span> <span class="cn">TRUE</span>, <span class="at">font_size =</span> <span class="dv">11</span>)</span></code></pre></div>
+<table class="table table-striped table-hover" style="font-size: 11px; margin-left: auto; margin-right: auto;">
+<caption style="font-size: initial !important;">
+Descriptive Statistics — Numerical Features
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+skim_type
+</th>
+<th style="text-align:left;">
+skim_variable
+</th>
+<th style="text-align:right;">
+n_missing
+</th>
+<th style="text-align:right;">
+complete_rate
+</th>
+<th style="text-align:right;">
+numeric.mean
+</th>
+<th style="text-align:right;">
+numeric.sd
+</th>
+<th style="text-align:right;">
+numeric.p0
+</th>
+<th style="text-align:right;">
+numeric.p25
+</th>
+<th style="text-align:right;">
+numeric.p50
+</th>
+<th style="text-align:right;">
+numeric.p75
+</th>
+<th style="text-align:right;">
+numeric.p100
+</th>
+<th style="text-align:left;">
+numeric.hist
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+numeric
+</td>
+<td style="text-align:left;">
+Speed_Over_Ground_knots
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1.760286e+01
+</td>
+<td style="text-align:right;">
+4.311979e+00
+</td>
+<td style="text-align:right;">
+1.000976e+01
+</td>
+<td style="text-align:right;">
+1.392845e+01
+</td>
+<td style="text-align:right;">
+1.771376e+01
+</td>
+<td style="text-align:right;">
+2.128479e+01
+</td>
+<td style="text-align:right;">
+2.499704e+01
+</td>
+<td style="text-align:left;">
+▇▇▇▇▇
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+numeric
+</td>
+<td style="text-align:left;">
+Engine_Power_kW
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1.757611e+03
+</td>
+<td style="text-align:right;">
+7.170028e+02
+</td>
+<td style="text-align:right;">
+5.010252e+02
+</td>
+<td style="text-align:right;">
+1.148105e+03
+</td>
+<td style="text-align:right;">
+1.757494e+03
+</td>
+<td style="text-align:right;">
+2.382594e+03
+</td>
+<td style="text-align:right;">
+2.998734e+03
+</td>
+<td style="text-align:left;">
+▇▇▇▇▇
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+numeric
+</td>
+<td style="text-align:left;">
+Distance_Traveled_nm
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1.036406e+03
+</td>
+<td style="text-align:right;">
+5.686321e+02
+</td>
+<td style="text-align:right;">
+5.043315e+01
+</td>
+<td style="text-align:right;">
+5.485116e+02
+</td>
+<td style="text-align:right;">
+1.037816e+03
+</td>
+<td style="text-align:right;">
+1.540934e+03
+</td>
+<td style="text-align:right;">
+1.998337e+03
+</td>
+<td style="text-align:left;">
+▇▇▇▇▇
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+numeric
+</td>
+<td style="text-align:left;">
+Draft_meters
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+9.929103e+00
+</td>
+<td style="text-align:right;">
+2.876423e+00
+</td>
+<td style="text-align:right;">
+5.001947e+00
+</td>
+<td style="text-align:right;">
+7.437485e+00
+</td>
+<td style="text-align:right;">
+9.918965e+00
+</td>
+<td style="text-align:right;">
+1.241315e+01
+</td>
+<td style="text-align:right;">
+1.499295e+01
+</td>
+<td style="text-align:left;">
+▇▇▇▇▇
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+numeric
+</td>
+<td style="text-align:left;">
+Cargo_Weight_tons
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1.032573e+03
+</td>
+<td style="text-align:right;">
+5.586975e+02
+</td>
+<td style="text-align:right;">
+5.022962e+01
+</td>
+<td style="text-align:right;">
+5.539836e+02
+</td>
+<td style="text-align:right;">
+1.043207e+03
+</td>
+<td style="text-align:right;">
+1.527722e+03
+</td>
+<td style="text-align:right;">
+1.999127e+03
+</td>
+<td style="text-align:left;">
+▇▇▇▇▇
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+numeric
+</td>
+<td style="text-align:left;">
+Operational_Cost_USD
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2.551433e+05
+</td>
+<td style="text-align:right;">
+1.408905e+05
+</td>
+<td style="text-align:right;">
+1.009231e+04
+</td>
+<td style="text-align:right;">
+1.312934e+05
+</td>
+<td style="text-align:right;">
+2.571577e+05
+</td>
+<td style="text-align:right;">
+3.817969e+05
+</td>
+<td style="text-align:right;">
+4.997349e+05
+</td>
+<td style="text-align:left;">
+▇▇▇▇▇
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+numeric
+</td>
+<td style="text-align:left;">
+Revenue_per_Voyage_USD
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+5.213621e+05
+</td>
+<td style="text-align:right;">
+2.712116e+05
+</td>
+<td style="text-align:right;">
+5.035181e+04
+</td>
+<td style="text-align:right;">
+2.903464e+05
+</td>
+<td style="text-align:right;">
+5.201769e+05
+</td>
+<td style="text-align:right;">
+7.500728e+05
+</td>
+<td style="text-align:right;">
+9.999167e+05
+</td>
+<td style="text-align:left;">
+▇▇▇▇▇
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+numeric
+</td>
+<td style="text-align:left;">
+Turnaround_Time_hours
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+4.174754e+01
+</td>
+<td style="text-align:right;">
+1.763313e+01
+</td>
+<td style="text-align:right;">
+1.201991e+01
+</td>
+<td style="text-align:right;">
+2.617354e+01
+</td>
+<td style="text-align:right;">
+4.158519e+01
+</td>
+<td style="text-align:right;">
+5.736392e+01
+</td>
+<td style="text-align:right;">
+7.197242e+01
+</td>
+<td style="text-align:left;">
+▇▇▇▇▇
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+numeric
+</td>
+<td style="text-align:left;">
+Efficiency_nm_per_kWh
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+7.986556e-01
+</td>
+<td style="text-align:right;">
+4.035898e-01
+</td>
+<td style="text-align:right;">
+1.002113e-01
+</td>
+<td style="text-align:right;">
+4.635917e-01
+</td>
+<td style="text-align:right;">
+7.898766e-01
+</td>
+<td style="text-align:right;">
+1.147426e+00
+</td>
+<td style="text-align:right;">
+1.499259e+00
+</td>
+<td style="text-align:left;">
+▇▇▇▇▇
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+numeric
+</td>
+<td style="text-align:left;">
+Seasonal_Impact_Score
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1.003816e+00
+</td>
+<td style="text-align:right;">
+2.882507e-01
+</td>
+<td style="text-align:right;">
+5.000044e-01
+</td>
+<td style="text-align:right;">
+7.580326e-01
+</td>
+<td style="text-align:right;">
+1.009009e+00
+</td>
+<td style="text-align:right;">
+1.252808e+00
+</td>
+<td style="text-align:right;">
+1.499224e+00
+</td>
+<td style="text-align:left;">
+▇▇▇▇▇
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+numeric
+</td>
+<td style="text-align:left;">
+Weekly_Voyage_Count
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+4.914839e+00
+</td>
+<td style="text-align:right;">
+2.597647e+00
+</td>
+<td style="text-align:right;">
+1.000000e+00
+</td>
+<td style="text-align:right;">
+3.000000e+00
+</td>
+<td style="text-align:right;">
+5.000000e+00
+</td>
+<td style="text-align:right;">
+7.000000e+00
+</td>
+<td style="text-align:right;">
+9.000000e+00
+</td>
+<td style="text-align:left;">
+▇▇▃▇▇
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+numeric
+</td>
+<td style="text-align:left;">
+Average_Load_Percentage
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+7.521922e+01
+</td>
+<td style="text-align:right;">
+1.451017e+01
+</td>
+<td style="text-align:right;">
+5.001201e+01
+</td>
+<td style="text-align:right;">
+6.270372e+01
+</td>
+<td style="text-align:right;">
+7.550471e+01
+</td>
+<td style="text-align:right;">
+8.772120e+01
+</td>
+<td style="text-align:right;">
+9.999964e+01
+</td>
+<td style="text-align:left;">
+▇▇▇▇▇
+</td>
+</tr>
+</tbody>
+</table>
+<hr />
+</div>
+<div id="univariate-analysis" class="section level1" number="6">
+<h1 number="6"><span class="header-section-number">6</span> 5. Univariate Analysis</h1>
+<div id="categorical-features" class="section level2" number="6.1">
+<h2 number="6.1"><span class="header-section-number">6.1</span> 5.1 Categorical Features</h2>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>p1 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(df, <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">fct_infreq</span>(Ship_Type), <span class="at">fill =</span> Ship_Type)) <span class="sc">+</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">color =</span> <span class="st">&quot;white&quot;</span>, <span class="at">width =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text</span>(<span class="at">stat =</span> <span class="st">&quot;count&quot;</span>, <span class="fu">aes</span>(<span class="at">label =</span> <span class="fu">after_stat</span>(count)),</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>            <span class="at">vjust =</span> <span class="sc">-</span><span class="fl">0.4</span>, <span class="at">fontface =</span> <span class="st">&quot;bold&quot;</span>, <span class="at">size =</span> <span class="fl">3.5</span>) <span class="sc">+</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_brewer</span>(<span class="at">palette =</span> <span class="st">&quot;Set2&quot;</span>) <span class="sc">+</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;Ship Type Distribution&quot;</span>, <span class="at">x =</span> <span class="st">&quot;Ship Type&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Count&quot;</span>) <span class="sc">+</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">13</span>) <span class="sc">+</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;none&quot;</span>)</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>p2 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(df, <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">fct_infreq</span>(Route_Type), <span class="at">fill =</span> Route_Type)) <span class="sc">+</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">color =</span> <span class="st">&quot;white&quot;</span>, <span class="at">width =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text</span>(<span class="at">stat =</span> <span class="st">&quot;count&quot;</span>, <span class="fu">aes</span>(<span class="at">label =</span> <span class="fu">after_stat</span>(count)),</span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>            <span class="at">vjust =</span> <span class="sc">-</span><span class="fl">0.4</span>, <span class="at">fontface =</span> <span class="st">&quot;bold&quot;</span>, <span class="at">size =</span> <span class="fl">3.5</span>) <span class="sc">+</span></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_brewer</span>(<span class="at">palette =</span> <span class="st">&quot;Set1&quot;</span>) <span class="sc">+</span></span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;Route Type Distribution&quot;</span>, <span class="at">x =</span> <span class="st">&quot;Route Type&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Count&quot;</span>) <span class="sc">+</span></span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">13</span>) <span class="sc">+</span></span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;none&quot;</span>)</span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>p3 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(df, <span class="fu">aes</span>(<span class="at">x =</span> Engine_Type, <span class="at">fill =</span> Engine_Type)) <span class="sc">+</span></span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">color =</span> <span class="st">&quot;white&quot;</span>, <span class="at">width =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text</span>(<span class="at">stat =</span> <span class="st">&quot;count&quot;</span>, <span class="fu">aes</span>(<span class="at">label =</span> <span class="fu">after_stat</span>(count)),</span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>            <span class="at">vjust =</span> <span class="sc">-</span><span class="fl">0.4</span>, <span class="at">fontface =</span> <span class="st">&quot;bold&quot;</span>, <span class="at">size =</span> <span class="fl">3.5</span>) <span class="sc">+</span></span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_brewer</span>(<span class="at">palette =</span> <span class="st">&quot;Pastel1&quot;</span>) <span class="sc">+</span></span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;Engine Type Distribution&quot;</span>, <span class="at">x =</span> <span class="st">&quot;Engine Type&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Count&quot;</span>) <span class="sc">+</span></span>
+<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">13</span>) <span class="sc">+</span></span>
+<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;none&quot;</span>)</span>
+<span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-28"><a href="#cb15-28" aria-hidden="true" tabindex="-1"></a>p4 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(df, <span class="fu">aes</span>(<span class="at">x =</span> Maintenance_Status, <span class="at">fill =</span> Maintenance_Status)) <span class="sc">+</span></span>
+<span id="cb15-29"><a href="#cb15-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">color =</span> <span class="st">&quot;white&quot;</span>, <span class="at">width =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
+<span id="cb15-30"><a href="#cb15-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text</span>(<span class="at">stat =</span> <span class="st">&quot;count&quot;</span>, <span class="fu">aes</span>(<span class="at">label =</span> <span class="fu">after_stat</span>(count)),</span>
+<span id="cb15-31"><a href="#cb15-31" aria-hidden="true" tabindex="-1"></a>            <span class="at">vjust =</span> <span class="sc">-</span><span class="fl">0.4</span>, <span class="at">fontface =</span> <span class="st">&quot;bold&quot;</span>, <span class="at">size =</span> <span class="fl">3.5</span>) <span class="sc">+</span></span>
+<span id="cb15-32"><a href="#cb15-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">&quot;Good&quot;</span> <span class="ot">=</span> <span class="st">&quot;#2ecc71&quot;</span>, <span class="st">&quot;Fair&quot;</span> <span class="ot">=</span> <span class="st">&quot;#f39c12&quot;</span>, <span class="st">&quot;Critical&quot;</span> <span class="ot">=</span> <span class="st">&quot;#e74c3c&quot;</span>)) <span class="sc">+</span></span>
+<span id="cb15-33"><a href="#cb15-33" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;Maintenance Status Distribution&quot;</span>, <span class="at">x =</span> <span class="st">&quot;Maintenance Status&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Count&quot;</span>) <span class="sc">+</span></span>
+<span id="cb15-34"><a href="#cb15-34" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">13</span>) <span class="sc">+</span></span>
+<span id="cb15-35"><a href="#cb15-35" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;none&quot;</span>)</span>
+<span id="cb15-36"><a href="#cb15-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-37"><a href="#cb15-37" aria-hidden="true" tabindex="-1"></a>p5 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(df, <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">fct_infreq</span>(Weather_Condition), <span class="at">fill =</span> Weather_Condition)) <span class="sc">+</span></span>
+<span id="cb15-38"><a href="#cb15-38" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">color =</span> <span class="st">&quot;white&quot;</span>, <span class="at">width =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
+<span id="cb15-39"><a href="#cb15-39" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text</span>(<span class="at">stat =</span> <span class="st">&quot;count&quot;</span>, <span class="fu">aes</span>(<span class="at">label =</span> <span class="fu">after_stat</span>(count)),</span>
+<span id="cb15-40"><a href="#cb15-40" aria-hidden="true" tabindex="-1"></a>            <span class="at">vjust =</span> <span class="sc">-</span><span class="fl">0.4</span>, <span class="at">fontface =</span> <span class="st">&quot;bold&quot;</span>, <span class="at">size =</span> <span class="fl">3.5</span>) <span class="sc">+</span></span>
+<span id="cb15-41"><a href="#cb15-41" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_brewer</span>(<span class="at">palette =</span> <span class="st">&quot;Blues&quot;</span>) <span class="sc">+</span></span>
+<span id="cb15-42"><a href="#cb15-42" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;Weather Condition Distribution&quot;</span>, <span class="at">x =</span> <span class="st">&quot;Weather Condition&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Count&quot;</span>) <span class="sc">+</span></span>
+<span id="cb15-43"><a href="#cb15-43" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">13</span>) <span class="sc">+</span></span>
+<span id="cb15-44"><a href="#cb15-44" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;none&quot;</span>)</span>
+<span id="cb15-45"><a href="#cb15-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-46"><a href="#cb15-46" aria-hidden="true" tabindex="-1"></a><span class="fu">grid.arrange</span>(p1, p2, p3, p4, p5, <span class="at">ncol =</span> <span class="dv">2</span>)</span></code></pre></div>
+<p><img src="Ship_EDA_files/figure-html/uni-cat-ship-type-1.png" alt="" width="960" style="display: block; margin: auto;" /></p>
+<p><strong>Key observations — categorical:</strong> - Ship types and route types appear fairly balanced, but some “None” categories exist that may indicate missing classifications. - All three maintenance statuses (Good, Fair, Critical) are present across the dataset. - Engine types: Diesel, HFO, Steam Turbine — each represents a distinct performance profile.</p>
+<hr />
+</div>
+<div id="numerical-features-histograms-density" class="section level2" number="6.2">
+<h2 number="6.2"><span class="header-section-number">6.2</span> 5.2 Numerical Features — Histograms + Density</h2>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>core_num <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;Speed_Over_Ground_knots&quot;</span>, <span class="st">&quot;Engine_Power_kW&quot;</span>, <span class="st">&quot;Distance_Traveled_nm&quot;</span>,</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>              <span class="st">&quot;Draft_meters&quot;</span>, <span class="st">&quot;Cargo_Weight_tons&quot;</span>, <span class="st">&quot;Operational_Cost_USD&quot;</span>,</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>              <span class="st">&quot;Revenue_per_Voyage_USD&quot;</span>, <span class="st">&quot;Turnaround_Time_hours&quot;</span>,</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>              <span class="st">&quot;Efficiency_nm_per_kWh&quot;</span>, <span class="st">&quot;Seasonal_Impact_Score&quot;</span>,</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>              <span class="st">&quot;Weekly_Voyage_Count&quot;</span>, <span class="st">&quot;Average_Load_Percentage&quot;</span>)</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>plots_hist <span class="ot">&lt;-</span> <span class="fu">lapply</span>(core_num, <span class="cf">function</span>(col) {</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(df, <span class="fu">aes_string</span>(<span class="at">x =</span> col)) <span class="sc">+</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_histogram</span>(<span class="fu">aes</span>(<span class="at">y =</span> <span class="fu">after_stat</span>(density)),</span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>                   <span class="at">bins =</span> <span class="dv">40</span>, <span class="at">fill =</span> <span class="st">&quot;#3498db&quot;</span>, <span class="at">color =</span> <span class="st">&quot;white&quot;</span>, <span class="at">alpha =</span> <span class="fl">0.8</span>) <span class="sc">+</span></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_density</span>(<span class="at">color =</span> <span class="st">&quot;#e74c3c&quot;</span>, <span class="at">linewidth =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">title =</span> col, <span class="at">x =</span> <span class="cn">NULL</span>, <span class="at">y =</span> <span class="st">&quot;Density&quot;</span>) <span class="sc">+</span></span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">11</span>)</span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a><span class="fu">do.call</span>(grid.arrange, <span class="fu">c</span>(plots_hist, <span class="at">ncol =</span> <span class="dv">3</span>))</span></code></pre></div>
+<p><img src="Ship_EDA_files/figure-html/uni-num-hist-1.png" alt="" width="960" style="display: block; margin: auto;" /></p>
+</div>
+<div id="boxplots-outlier-detection" class="section level2" number="6.3">
+<h2 number="6.3"><span class="header-section-number">6.3</span> 5.3 Boxplots — Outlier Detection</h2>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>plots_box <span class="ot">&lt;-</span> <span class="fu">lapply</span>(core_num, <span class="cf">function</span>(col) {</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(df, <span class="fu">aes_string</span>(<span class="at">y =</span> col)) <span class="sc">+</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_boxplot</span>(<span class="at">fill =</span> <span class="st">&quot;#9b59b6&quot;</span>, <span class="at">color =</span> <span class="st">&quot;#2c3e50&quot;</span>, <span class="at">alpha =</span> <span class="fl">0.7</span>, <span class="at">outlier.color =</span> <span class="st">&quot;#e74c3c&quot;</span>) <span class="sc">+</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">title =</span> col, <span class="at">x =</span> <span class="cn">NULL</span>) <span class="sc">+</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">11</span>) <span class="sc">+</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_blank</span>())</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a><span class="fu">do.call</span>(grid.arrange, <span class="fu">c</span>(plots_box, <span class="at">ncol =</span> <span class="dv">3</span>))</span></code></pre></div>
+<p><img src="Ship_EDA_files/figure-html/uni-num-box-1.png" alt="" width="960" style="display: block; margin: auto;" /></p>
+</div>
+<div id="summary-statistics-table" class="section level2" number="6.4">
+<h2 number="6.4"><span class="header-section-number">6.4</span> 5.4 Summary Statistics Table</h2>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>summary_tbl <span class="ot">&lt;-</span> df <span class="sc">%&gt;%</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="fu">all_of</span>(core_num)) <span class="sc">%&gt;%</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="fu">everything</span>(), <span class="at">names_to =</span> <span class="st">&quot;Feature&quot;</span>, <span class="at">values_to =</span> <span class="st">&quot;Value&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Feature) <span class="sc">%&gt;%</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">Min    =</span> <span class="fu">round</span>(<span class="fu">min</span>(Value, <span class="at">na.rm=</span><span class="cn">TRUE</span>), <span class="dv">2</span>),</span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">Q1     =</span> <span class="fu">round</span>(<span class="fu">quantile</span>(Value, <span class="fl">0.25</span>, <span class="at">na.rm=</span><span class="cn">TRUE</span>), <span class="dv">2</span>),</span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">Median =</span> <span class="fu">round</span>(<span class="fu">median</span>(Value, <span class="at">na.rm=</span><span class="cn">TRUE</span>), <span class="dv">2</span>),</span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">Mean   =</span> <span class="fu">round</span>(<span class="fu">mean</span>(Value, <span class="at">na.rm=</span><span class="cn">TRUE</span>), <span class="dv">2</span>),</span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">Q3     =</span> <span class="fu">round</span>(<span class="fu">quantile</span>(Value, <span class="fl">0.75</span>, <span class="at">na.rm=</span><span class="cn">TRUE</span>), <span class="dv">2</span>),</span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">Max    =</span> <span class="fu">round</span>(<span class="fu">max</span>(Value, <span class="at">na.rm=</span><span class="cn">TRUE</span>), <span class="dv">2</span>),</span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">SD     =</span> <span class="fu">round</span>(<span class="fu">sd</span>(Value, <span class="at">na.rm=</span><span class="cn">TRUE</span>), <span class="dv">2</span>),</span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">Skewness =</span> <span class="fu">round</span>(moments<span class="sc">::</span><span class="fu">skewness</span>(Value, <span class="at">na.rm=</span><span class="cn">TRUE</span>), <span class="dv">3</span>)</span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(summary_tbl, <span class="at">caption =</span> <span class="st">&quot;Univariate Summary Statistics&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable_styling</span>(<span class="at">bootstrap_options =</span> <span class="fu">c</span>(<span class="st">&quot;striped&quot;</span>,<span class="st">&quot;hover&quot;</span>,<span class="st">&quot;condensed&quot;</span>),</span>
+<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a>                <span class="at">full_width =</span> <span class="cn">TRUE</span>, <span class="at">font_size =</span> <span class="dv">12</span>)</span></code></pre></div>
+<table class="table table-striped table-hover table-condensed" style="font-size: 12px; margin-left: auto; margin-right: auto;">
+<caption style="font-size: initial !important;">
+Univariate Summary Statistics
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+Feature
+</th>
+<th style="text-align:right;">
+Min
+</th>
+<th style="text-align:right;">
+Q1
+</th>
+<th style="text-align:right;">
+Median
+</th>
+<th style="text-align:right;">
+Mean
+</th>
+<th style="text-align:right;">
+Q3
+</th>
+<th style="text-align:right;">
+Max
+</th>
+<th style="text-align:right;">
+SD
+</th>
+<th style="text-align:right;">
+Skewness
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Average_Load_Percentage
+</td>
+<td style="text-align:right;">
+50.01
+</td>
+<td style="text-align:right;">
+62.70
+</td>
+<td style="text-align:right;">
+75.50
+</td>
+<td style="text-align:right;">
+75.22
+</td>
+<td style="text-align:right;">
+87.72
+</td>
+<td style="text-align:right;">
+100.00
+</td>
+<td style="text-align:right;">
+14.51
+</td>
+<td style="text-align:right;">
+-0.018
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Cargo_Weight_tons
+</td>
+<td style="text-align:right;">
+50.23
+</td>
+<td style="text-align:right;">
+553.98
+</td>
+<td style="text-align:right;">
+1043.21
+</td>
+<td style="text-align:right;">
+1032.57
+</td>
+<td style="text-align:right;">
+1527.72
+</td>
+<td style="text-align:right;">
+1999.13
+</td>
+<td style="text-align:right;">
+558.70
+</td>
+<td style="text-align:right;">
+-0.013
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Distance_Traveled_nm
+</td>
+<td style="text-align:right;">
+50.43
+</td>
+<td style="text-align:right;">
+548.51
+</td>
+<td style="text-align:right;">
+1037.82
+</td>
+<td style="text-align:right;">
+1036.41
+</td>
+<td style="text-align:right;">
+1540.93
+</td>
+<td style="text-align:right;">
+1998.34
+</td>
+<td style="text-align:right;">
+568.63
+</td>
+<td style="text-align:right;">
+-0.022
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Draft_meters
+</td>
+<td style="text-align:right;">
+5.00
+</td>
+<td style="text-align:right;">
+7.44
+</td>
+<td style="text-align:right;">
+9.92
+</td>
+<td style="text-align:right;">
+9.93
+</td>
+<td style="text-align:right;">
+12.41
+</td>
+<td style="text-align:right;">
+14.99
+</td>
+<td style="text-align:right;">
+2.88
+</td>
+<td style="text-align:right;">
+0.021
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Efficiency_nm_per_kWh
+</td>
+<td style="text-align:right;">
+0.10
+</td>
+<td style="text-align:right;">
+0.46
+</td>
+<td style="text-align:right;">
+0.79
+</td>
+<td style="text-align:right;">
+0.80
+</td>
+<td style="text-align:right;">
+1.15
+</td>
+<td style="text-align:right;">
+1.50
+</td>
+<td style="text-align:right;">
+0.40
+</td>
+<td style="text-align:right;">
+0.026
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Engine_Power_kW
+</td>
+<td style="text-align:right;">
+501.03
+</td>
+<td style="text-align:right;">
+1148.10
+</td>
+<td style="text-align:right;">
+1757.49
+</td>
+<td style="text-align:right;">
+1757.61
+</td>
+<td style="text-align:right;">
+2382.59
+</td>
+<td style="text-align:right;">
+2998.73
+</td>
+<td style="text-align:right;">
+717.00
+</td>
+<td style="text-align:right;">
+-0.006
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Operational_Cost_USD
+</td>
+<td style="text-align:right;">
+10092.31
+</td>
+<td style="text-align:right;">
+131293.38
+</td>
+<td style="text-align:right;">
+257157.65
+</td>
+<td style="text-align:right;">
+255143.34
+</td>
+<td style="text-align:right;">
+381796.93
+</td>
+<td style="text-align:right;">
+499734.87
+</td>
+<td style="text-align:right;">
+140890.48
+</td>
+<td style="text-align:right;">
+0.002
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Revenue_per_Voyage_USD
+</td>
+<td style="text-align:right;">
+50351.81
+</td>
+<td style="text-align:right;">
+290346.39
+</td>
+<td style="text-align:right;">
+520176.93
+</td>
+<td style="text-align:right;">
+521362.06
+</td>
+<td style="text-align:right;">
+750072.79
+</td>
+<td style="text-align:right;">
+999916.70
+</td>
+<td style="text-align:right;">
+271211.63
+</td>
+<td style="text-align:right;">
+0.012
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Seasonal_Impact_Score
+</td>
+<td style="text-align:right;">
+0.50
+</td>
+<td style="text-align:right;">
+0.76
+</td>
+<td style="text-align:right;">
+1.01
+</td>
+<td style="text-align:right;">
+1.00
+</td>
+<td style="text-align:right;">
+1.25
+</td>
+<td style="text-align:right;">
+1.50
+</td>
+<td style="text-align:right;">
+0.29
+</td>
+<td style="text-align:right;">
+-0.019
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Speed_Over_Ground_knots
+</td>
+<td style="text-align:right;">
+10.01
+</td>
+<td style="text-align:right;">
+13.93
+</td>
+<td style="text-align:right;">
+17.71
+</td>
+<td style="text-align:right;">
+17.60
+</td>
+<td style="text-align:right;">
+21.28
+</td>
+<td style="text-align:right;">
+25.00
+</td>
+<td style="text-align:right;">
+4.31
+</td>
+<td style="text-align:right;">
+-0.035
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Turnaround_Time_hours
+</td>
+<td style="text-align:right;">
+12.02
+</td>
+<td style="text-align:right;">
+26.17
+</td>
+<td style="text-align:right;">
+41.59
+</td>
+<td style="text-align:right;">
+41.75
+</td>
+<td style="text-align:right;">
+57.36
+</td>
+<td style="text-align:right;">
+71.97
+</td>
+<td style="text-align:right;">
+17.63
+</td>
+<td style="text-align:right;">
+0.018
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Weekly_Voyage_Count
+</td>
+<td style="text-align:right;">
+1.00
+</td>
+<td style="text-align:right;">
+3.00
+</td>
+<td style="text-align:right;">
+5.00
+</td>
+<td style="text-align:right;">
+4.91
+</td>
+<td style="text-align:right;">
+7.00
+</td>
+<td style="text-align:right;">
+9.00
+</td>
+<td style="text-align:right;">
+2.60
+</td>
+<td style="text-align:right;">
+0.025
+</td>
+</tr>
+</tbody>
+</table>
+<hr />
+</div>
+</div>
+<div id="bivariate-analysis" class="section level1" number="7">
+<h1 number="7"><span class="header-section-number">7</span> 6. Bivariate Analysis</h1>
+<div id="numerical-vs-numerical-scatter-plots" class="section level2" number="7.1">
+<h2 number="7.1"><span class="header-section-number">7.1</span> 6.1 Numerical vs Numerical — Scatter Plots</h2>
+<div id="speed-vs-efficiency" class="section level3" number="7.1.1">
+<h3 number="7.1.1"><span class="header-section-number">7.1.1</span> Speed vs Efficiency</h3>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(df, <span class="fu">aes</span>(<span class="at">x =</span> Speed_Over_Ground_knots, <span class="at">y =</span> Efficiency_nm_per_kWh,</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>               <span class="at">color =</span> Engine_Type)) <span class="sc">+</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.5</span>, <span class="at">size =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">&quot;lm&quot;</span>, <span class="at">se =</span> <span class="cn">TRUE</span>, <span class="fu">aes</span>(<span class="at">group =</span> Engine_Type)) <span class="sc">+</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_brewer</span>(<span class="at">palette =</span> <span class="st">&quot;Set1&quot;</span>) <span class="sc">+</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;Speed vs Fuel Efficiency by Engine Type&quot;</span>,</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">&quot;Speed Over Ground (knots)&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Efficiency (nm/kWh)&quot;</span>,</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>       <span class="at">color =</span> <span class="st">&quot;Engine Type&quot;</span>) <span class="sc">+</span></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">13</span>)</span></code></pre></div>
+<p><img src="Ship_EDA_files/figure-html/biv-speed-efficiency-1.png" alt="" width="960" style="display: block; margin: auto;" /></p>
+</div>
+<div id="operational-cost-vs-revenue" class="section level3" number="7.1.2">
+<h3 number="7.1.2"><span class="header-section-number">7.1.2</span> Operational Cost vs Revenue</h3>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(df, <span class="fu">aes</span>(<span class="at">x =</span> Operational_Cost_USD, <span class="at">y =</span> Revenue_per_Voyage_USD,</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>               <span class="at">color =</span> Ship_Type)) <span class="sc">+</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.5</span>, <span class="at">size =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_abline</span>(<span class="at">slope =</span> <span class="dv">1</span>, <span class="at">intercept =</span> <span class="dv">0</span>, <span class="at">linetype =</span> <span class="st">&quot;dashed&quot;</span>,</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>              <span class="at">color =</span> <span class="st">&quot;black&quot;</span>, <span class="at">linewidth =</span> <span class="fl">0.8</span>) <span class="sc">+</span></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_brewer</span>(<span class="at">palette =</span> <span class="st">&quot;Set2&quot;</span>) <span class="sc">+</span></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">labels =</span> <span class="fu">label_dollar</span>(<span class="at">scale =</span> <span class="fl">1e-3</span>, <span class="at">suffix =</span> <span class="st">&quot;K&quot;</span>)) <span class="sc">+</span></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">labels =</span> <span class="fu">label_dollar</span>(<span class="at">scale =</span> <span class="fl">1e-3</span>, <span class="at">suffix =</span> <span class="st">&quot;K&quot;</span>)) <span class="sc">+</span></span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;Operational Cost vs Revenue by Ship Type&quot;</span>,</span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>       <span class="at">subtitle =</span> <span class="st">&quot;Dashed line = break-even (Revenue = Cost)&quot;</span>,</span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">&quot;Operational Cost (USD)&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Revenue per Voyage (USD)&quot;</span>,</span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>       <span class="at">color =</span> <span class="st">&quot;Ship Type&quot;</span>) <span class="sc">+</span></span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">13</span>)</span></code></pre></div>
+<p><img src="Ship_EDA_files/figure-html/biv-cost-revenue-1.png" alt="" width="960" style="display: block; margin: auto;" /></p>
+</div>
+<div id="engine-power-vs-distance-traveled" class="section level3" number="7.1.3">
+<h3 number="7.1.3"><span class="header-section-number">7.1.3</span> Engine Power vs Distance Traveled</h3>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(df, <span class="fu">aes</span>(<span class="at">x =</span> Engine_Power_kW, <span class="at">y =</span> Distance_Traveled_nm,</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>               <span class="at">color =</span> Route_Type)) <span class="sc">+</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.5</span>, <span class="at">size =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">&quot;lm&quot;</span>, <span class="at">se =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_brewer</span>(<span class="at">palette =</span> <span class="st">&quot;Dark2&quot;</span>) <span class="sc">+</span></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;Engine Power vs Distance Traveled by Route Type&quot;</span>,</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">&quot;Engine Power (kW)&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Distance Traveled (nm)&quot;</span>,</span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>       <span class="at">color =</span> <span class="st">&quot;Route Type&quot;</span>) <span class="sc">+</span></span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">13</span>)</span></code></pre></div>
+<p><img src="Ship_EDA_files/figure-html/biv-power-distance-1.png" alt="" width="960" style="display: block; margin: auto;" /></p>
+</div>
+<div id="cargo-weight-vs-draft" class="section level3" number="7.1.4">
+<h3 number="7.1.4"><span class="header-section-number">7.1.4</span> Cargo Weight vs Draft</h3>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(df, <span class="fu">aes</span>(<span class="at">x =</span> Cargo_Weight_tons, <span class="at">y =</span> Draft_meters,</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>               <span class="at">color =</span> Ship_Type)) <span class="sc">+</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.5</span>, <span class="at">size =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">&quot;lm&quot;</span>, <span class="at">se =</span> <span class="cn">TRUE</span>, <span class="at">color =</span> <span class="st">&quot;black&quot;</span>, <span class="at">linetype =</span> <span class="st">&quot;dotted&quot;</span>) <span class="sc">+</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_brewer</span>(<span class="at">palette =</span> <span class="st">&quot;Set2&quot;</span>) <span class="sc">+</span></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;Cargo Weight vs Draft Depth&quot;</span>,</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>       <span class="at">subtitle =</span> <span class="st">&quot;Higher cargo load should increase draft&quot;</span>,</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">&quot;Cargo Weight (tons)&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Draft (meters)&quot;</span>,</span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>       <span class="at">color =</span> <span class="st">&quot;Ship Type&quot;</span>) <span class="sc">+</span></span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">13</span>)</span></code></pre></div>
+<p><img src="Ship_EDA_files/figure-html/biv-cargo-draft-1.png" alt="" width="960" style="display: block; margin: auto;" /></p>
+<hr />
+</div>
+</div>
+<div id="numerical-vs-categorical-box-plots" class="section level2" number="7.2">
+<h2 number="7.2"><span class="header-section-number">7.2</span> 6.2 Numerical vs Categorical — Box Plots</h2>
+<div id="efficiency-by-ship-type" class="section level3" number="7.2.1">
+<h3 number="7.2.1"><span class="header-section-number">7.2.1</span> Efficiency by Ship Type</h3>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(df, <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">reorder</span>(Ship_Type, Efficiency_nm_per_kWh, median),</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>               <span class="at">y =</span> Efficiency_nm_per_kWh, <span class="at">fill =</span> Ship_Type)) <span class="sc">+</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>(<span class="at">alpha =</span> <span class="fl">0.8</span>, <span class="at">outlier.shape =</span> <span class="dv">21</span>, <span class="at">outlier.size =</span> <span class="fl">1.5</span>) <span class="sc">+</span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_jitter</span>(<span class="at">width =</span> <span class="fl">0.15</span>, <span class="at">alpha =</span> <span class="fl">0.2</span>, <span class="at">size =</span> <span class="fl">0.8</span>) <span class="sc">+</span></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_brewer</span>(<span class="at">palette =</span> <span class="st">&quot;Set2&quot;</span>) <span class="sc">+</span></span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_flip</span>() <span class="sc">+</span></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;Fuel Efficiency by Ship Type&quot;</span>,</span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">&quot;Ship Type&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Efficiency (nm/kWh)&quot;</span>) <span class="sc">+</span></span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">13</span>) <span class="sc">+</span></span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;none&quot;</span>)</span></code></pre></div>
+<p><img src="Ship_EDA_files/figure-html/biv-eff-shiptype-1.png" alt="" width="960" style="display: block; margin: auto;" /></p>
+</div>
+<div id="operational-cost-by-engine-type" class="section level3" number="7.2.2">
+<h3 number="7.2.2"><span class="header-section-number">7.2.2</span> Operational Cost by Engine Type</h3>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(df, <span class="fu">aes</span>(<span class="at">x =</span> Engine_Type, <span class="at">y =</span> Operational_Cost_USD, <span class="at">fill =</span> Engine_Type)) <span class="sc">+</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>(<span class="at">alpha =</span> <span class="fl">0.8</span>, <span class="at">outlier.shape =</span> <span class="dv">21</span>) <span class="sc">+</span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_jitter</span>(<span class="at">width =</span> <span class="fl">0.15</span>, <span class="at">alpha =</span> <span class="fl">0.2</span>, <span class="at">size =</span> <span class="fl">0.8</span>) <span class="sc">+</span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_brewer</span>(<span class="at">palette =</span> <span class="st">&quot;Pastel1&quot;</span>) <span class="sc">+</span></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">labels =</span> <span class="fu">label_dollar</span>(<span class="at">scale =</span> <span class="fl">1e-3</span>, <span class="at">suffix =</span> <span class="st">&quot;K&quot;</span>)) <span class="sc">+</span></span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;Operational Cost by Engine Type&quot;</span>,</span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">&quot;Engine Type&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Operational Cost (USD)&quot;</span>) <span class="sc">+</span></span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">13</span>) <span class="sc">+</span></span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;none&quot;</span>)</span></code></pre></div>
+<p><img src="Ship_EDA_files/figure-html/biv-cost-engine-1.png" alt="" width="960" style="display: block; margin: auto;" /></p>
+</div>
+<div id="revenue-by-maintenance-status" class="section level3" number="7.2.3">
+<h3 number="7.2.3"><span class="header-section-number">7.2.3</span> Revenue by Maintenance Status</h3>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(df, <span class="fu">aes</span>(<span class="at">x =</span> Maintenance_Status, <span class="at">y =</span> Revenue_per_Voyage_USD,</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>               <span class="at">fill =</span> Maintenance_Status)) <span class="sc">+</span></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>(<span class="at">alpha =</span> <span class="fl">0.8</span>, <span class="at">outlier.shape =</span> <span class="dv">21</span>) <span class="sc">+</span></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_jitter</span>(<span class="at">width =</span> <span class="fl">0.15</span>, <span class="at">alpha =</span> <span class="fl">0.2</span>, <span class="at">size =</span> <span class="fl">0.8</span>) <span class="sc">+</span></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">&quot;Good&quot;</span> <span class="ot">=</span> <span class="st">&quot;#2ecc71&quot;</span>, <span class="st">&quot;Fair&quot;</span> <span class="ot">=</span> <span class="st">&quot;#f39c12&quot;</span>, <span class="st">&quot;Critical&quot;</span> <span class="ot">=</span> <span class="st">&quot;#e74c3c&quot;</span>)) <span class="sc">+</span></span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">labels =</span> <span class="fu">label_dollar</span>(<span class="at">scale =</span> <span class="fl">1e-3</span>, <span class="at">suffix =</span> <span class="st">&quot;K&quot;</span>)) <span class="sc">+</span></span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;Revenue per Voyage by Maintenance Status&quot;</span>,</span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">&quot;Maintenance Status&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Revenue (USD)&quot;</span>) <span class="sc">+</span></span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">13</span>) <span class="sc">+</span></span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;none&quot;</span>)</span></code></pre></div>
+<p><img src="Ship_EDA_files/figure-html/biv-rev-maintenance-1.png" alt="" width="960" style="display: block; margin: auto;" /></p>
+</div>
+<div id="turnaround-time-by-route-type" class="section level3" number="7.2.4">
+<h3 number="7.2.4"><span class="header-section-number">7.2.4</span> Turnaround Time by Route Type</h3>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(df, <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">reorder</span>(Route_Type, Turnaround_Time_hours, median),</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>               <span class="at">y =</span> Turnaround_Time_hours, <span class="at">fill =</span> Route_Type)) <span class="sc">+</span></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>(<span class="at">alpha =</span> <span class="fl">0.8</span>, <span class="at">outlier.shape =</span> <span class="dv">21</span>) <span class="sc">+</span></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_flip</span>() <span class="sc">+</span></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_brewer</span>(<span class="at">palette =</span> <span class="st">&quot;Set1&quot;</span>) <span class="sc">+</span></span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;Turnaround Time by Route Type&quot;</span>,</span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">&quot;Route Type&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Turnaround Time (hours)&quot;</span>) <span class="sc">+</span></span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">13</span>) <span class="sc">+</span></span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;none&quot;</span>)</span></code></pre></div>
+<p><img src="Ship_EDA_files/figure-html/biv-turnaround-route-1.png" alt="" width="960" style="display: block; margin: auto;" /></p>
+</div>
+<div id="speed-by-weather-condition" class="section level3" number="7.2.5">
+<h3 number="7.2.5"><span class="header-section-number">7.2.5</span> Speed by Weather Condition</h3>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(df, <span class="fu">aes</span>(<span class="at">x =</span> Speed_Over_Ground_knots, <span class="at">y =</span> Weather_Condition,</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>               <span class="at">fill =</span> Weather_Condition)) <span class="sc">+</span></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_density_ridges</span>(<span class="at">alpha =</span> <span class="fl">0.7</span>, <span class="at">scale =</span> <span class="fl">1.2</span>) <span class="sc">+</span></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_brewer</span>(<span class="at">palette =</span> <span class="st">&quot;Blues&quot;</span>) <span class="sc">+</span></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;Speed Distribution by Weather Condition&quot;</span>,</span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">&quot;Speed Over Ground (knots)&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Weather Condition&quot;</span>) <span class="sc">+</span></span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">13</span>) <span class="sc">+</span></span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;none&quot;</span>)</span></code></pre></div>
+<p><img src="Ship_EDA_files/figure-html/biv-speed-weather-1.png" alt="" width="960" style="display: block; margin: auto;" /></p>
+<hr />
+</div>
+</div>
+<div id="correlation-matrix" class="section level2" number="7.3">
+<h2 number="7.3"><span class="header-section-number">7.3</span> 6.3 Correlation Matrix</h2>
+<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>num_df <span class="ot">&lt;-</span> df <span class="sc">%&gt;%</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="fu">all_of</span>(core_num))</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>cor_mat <span class="ot">&lt;-</span> <span class="fu">cor</span>(num_df, <span class="at">use =</span> <span class="st">&quot;complete.obs&quot;</span>)</span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a><span class="fu">corrplot</span>(cor_mat,</span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>         <span class="at">method   =</span> <span class="st">&quot;color&quot;</span>,</span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>         <span class="at">type     =</span> <span class="st">&quot;upper&quot;</span>,</span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a>         <span class="at">order    =</span> <span class="st">&quot;hclust&quot;</span>,</span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a>         <span class="at">addCoef.col =</span> <span class="st">&quot;black&quot;</span>,</span>
+<span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a>         <span class="at">tl.col   =</span> <span class="st">&quot;black&quot;</span>,</span>
+<span id="cb28-12"><a href="#cb28-12" aria-hidden="true" tabindex="-1"></a>         <span class="at">tl.srt   =</span> <span class="dv">45</span>,</span>
+<span id="cb28-13"><a href="#cb28-13" aria-hidden="true" tabindex="-1"></a>         <span class="at">number.cex =</span> <span class="fl">0.75</span>,</span>
+<span id="cb28-14"><a href="#cb28-14" aria-hidden="true" tabindex="-1"></a>         <span class="at">col      =</span> <span class="fu">colorRampPalette</span>(<span class="fu">c</span>(<span class="st">&quot;#e74c3c&quot;</span>, <span class="st">&quot;white&quot;</span>, <span class="st">&quot;#2980b9&quot;</span>))(<span class="dv">200</span>),</span>
+<span id="cb28-15"><a href="#cb28-15" aria-hidden="true" tabindex="-1"></a>         <span class="at">title    =</span> <span class="st">&quot;Correlation Matrix — Numerical Features&quot;</span>,</span>
+<span id="cb28-16"><a href="#cb28-16" aria-hidden="true" tabindex="-1"></a>         <span class="at">mar      =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">2</span>, <span class="dv">0</span>))</span></code></pre></div>
+<p><img src="Ship_EDA_files/figure-html/biv-corr-1.png" alt="" width="960" style="display: block; margin: auto;" /></p>
+<div id="top-correlations" class="section level3" number="7.3.1">
+<h3 number="7.3.1"><span class="header-section-number">7.3.1</span> Top Correlations</h3>
+<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>cor_df <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(<span class="fu">as.table</span>(cor_mat)) <span class="sc">%&gt;%</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">Feature1 =</span> Var1, <span class="at">Feature2 =</span> Var2, <span class="at">Correlation =</span> Freq) <span class="sc">%&gt;%</span></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Feature1 <span class="sc">!=</span> Feature2) <span class="sc">%&gt;%</span></span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Abs_Corr =</span> <span class="fu">abs</span>(Correlation)) <span class="sc">%&gt;%</span></span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(Abs_Corr)) <span class="sc">%&gt;%</span></span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">duplicated</span>(Abs_Corr)) <span class="sc">%&gt;%</span></span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">head</span>(<span class="dv">15</span>)</span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(cor_df, <span class="at">caption =</span> <span class="st">&quot;Top 15 Feature Correlations (absolute)&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable_styling</span>(<span class="at">bootstrap_options =</span> <span class="fu">c</span>(<span class="st">&quot;striped&quot;</span>,<span class="st">&quot;hover&quot;</span>), <span class="at">full_width =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
+<table class="table table-striped table-hover" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+Top 15 Feature Correlations (absolute)
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+Feature1
+</th>
+<th style="text-align:left;">
+Feature2
+</th>
+<th style="text-align:right;">
+Correlation
+</th>
+<th style="text-align:right;">
+Abs_Corr
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Weekly_Voyage_Count
+</td>
+<td style="text-align:left;">
+Distance_Traveled_nm
+</td>
+<td style="text-align:right;">
+0.0443019
+</td>
+<td style="text-align:right;">
+0.0443019
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Revenue_per_Voyage_USD
+</td>
+<td style="text-align:left;">
+Distance_Traveled_nm
+</td>
+<td style="text-align:right;">
+0.0403882
+</td>
+<td style="text-align:right;">
+0.0403882
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Weekly_Voyage_Count
+</td>
+<td style="text-align:left;">
+Engine_Power_kW
+</td>
+<td style="text-align:right;">
+0.0365879
+</td>
+<td style="text-align:right;">
+0.0365879
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Operational_Cost_USD
+</td>
+<td style="text-align:left;">
+Cargo_Weight_tons
+</td>
+<td style="text-align:right;">
+-0.0364994
+</td>
+<td style="text-align:right;">
+0.0364994
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Operational_Cost_USD
+</td>
+<td style="text-align:left;">
+Speed_Over_Ground_knots
+</td>
+<td style="text-align:right;">
+-0.0358248
+</td>
+<td style="text-align:right;">
+0.0358248
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Turnaround_Time_hours
+</td>
+<td style="text-align:left;">
+Engine_Power_kW
+</td>
+<td style="text-align:right;">
+-0.0324418
+</td>
+<td style="text-align:right;">
+0.0324418
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Turnaround_Time_hours
+</td>
+<td style="text-align:left;">
+Cargo_Weight_tons
+</td>
+<td style="text-align:right;">
+-0.0317433
+</td>
+<td style="text-align:right;">
+0.0317433
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Average_Load_Percentage
+</td>
+<td style="text-align:left;">
+Seasonal_Impact_Score
+</td>
+<td style="text-align:right;">
+-0.0313398
+</td>
+<td style="text-align:right;">
+0.0313398
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Turnaround_Time_hours
+</td>
+<td style="text-align:left;">
+Draft_meters
+</td>
+<td style="text-align:right;">
+-0.0293236
+</td>
+<td style="text-align:right;">
+0.0293236
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Seasonal_Impact_Score
+</td>
+<td style="text-align:left;">
+Speed_Over_Ground_knots
+</td>
+<td style="text-align:right;">
+0.0283568
+</td>
+<td style="text-align:right;">
+0.0283568
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Turnaround_Time_hours
+</td>
+<td style="text-align:left;">
+Revenue_per_Voyage_USD
+</td>
+<td style="text-align:right;">
+-0.0268385
+</td>
+<td style="text-align:right;">
+0.0268385
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Seasonal_Impact_Score
+</td>
+<td style="text-align:left;">
+Cargo_Weight_tons
+</td>
+<td style="text-align:right;">
+-0.0267545
+</td>
+<td style="text-align:right;">
+0.0267545
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Average_Load_Percentage
+</td>
+<td style="text-align:left;">
+Cargo_Weight_tons
+</td>
+<td style="text-align:right;">
+0.0266902
+</td>
+<td style="text-align:right;">
+0.0266902
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Turnaround_Time_hours
+</td>
+<td style="text-align:left;">
+Distance_Traveled_nm
+</td>
+<td style="text-align:right;">
+-0.0266724
+</td>
+<td style="text-align:right;">
+0.0266724
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Revenue_per_Voyage_USD
+</td>
+<td style="text-align:left;">
+Operational_Cost_USD
+</td>
+<td style="text-align:right;">
+0.0238651
+</td>
+<td style="text-align:right;">
+0.0238651
+</td>
+</tr>
+</tbody>
+</table>
+<hr />
+</div>
+</div>
+</div>
+<div id="multivariate-analysis" class="section level1" number="8">
+<h1 number="8"><span class="header-section-number">8</span> 7. Multivariate Analysis</h1>
+<div id="pairs-plot-ggally" class="section level2" number="8.1">
+<h2 number="8.1"><span class="header-section-number">8.1</span> 7.1 Pairs Plot (GGally)</h2>
+<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>key_features <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;Speed_Over_Ground_knots&quot;</span>, <span class="st">&quot;Efficiency_nm_per_kWh&quot;</span>,</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>                  <span class="st">&quot;Engine_Power_kW&quot;</span>, <span class="st">&quot;Operational_Cost_USD&quot;</span>,</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>                  <span class="st">&quot;Revenue_per_Voyage_USD&quot;</span>, <span class="st">&quot;Average_Load_Percentage&quot;</span>)</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a><span class="fu">ggpairs</span>(df[, <span class="fu">c</span>(key_features, <span class="st">&quot;Ship_Type&quot;</span>)],</span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>        <span class="fu">aes</span>(<span class="at">color =</span> Ship_Type, <span class="at">alpha =</span> <span class="fl">0.4</span>),</span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>        <span class="at">upper =</span> <span class="fu">list</span>(<span class="at">continuous =</span> <span class="fu">wrap</span>(<span class="st">&quot;cor&quot;</span>, <span class="at">size =</span> <span class="dv">3</span>)),</span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>        <span class="at">lower =</span> <span class="fu">list</span>(<span class="at">continuous =</span> <span class="fu">wrap</span>(<span class="st">&quot;points&quot;</span>, <span class="at">alpha =</span> <span class="fl">0.3</span>, <span class="at">size =</span> <span class="fl">0.8</span>)),</span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>        <span class="at">diag  =</span> <span class="fu">list</span>(<span class="at">continuous =</span> <span class="fu">wrap</span>(<span class="st">&quot;densityDiag&quot;</span>, <span class="at">alpha =</span> <span class="fl">0.5</span>))) <span class="sc">+</span></span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_brewer</span>(<span class="at">palette =</span> <span class="st">&quot;Set2&quot;</span>) <span class="sc">+</span></span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_brewer</span>(<span class="at">palette =</span> <span class="st">&quot;Set2&quot;</span>) <span class="sc">+</span></span>
+<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;Pairs Plot — Key Clustering Features Coloured by Ship Type&quot;</span>) <span class="sc">+</span></span>
+<span id="cb30-13"><a href="#cb30-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">10</span>)</span></code></pre></div>
+<p><img src="Ship_EDA_files/figure-html/multi-ggpairs-1.png" alt="" width="1152" style="display: block; margin: auto;" /></p>
+<hr />
+</div>
+<div id="heatmap-mean-feature-values-by-ship-type-maintenance" class="section level2" number="8.2">
+<h2 number="8.2"><span class="header-section-number">8.2</span> 7.2 Heatmap: Mean Feature Values by Ship Type × Maintenance</h2>
+<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>heatmap_data <span class="ot">&lt;-</span> df <span class="sc">%&gt;%</span></span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Ship_Type, Maintenance_Status) <span class="sc">%&gt;%</span></span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">Avg_Efficiency   =</span> <span class="fu">mean</span>(Efficiency_nm_per_kWh, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">Avg_Cost         =</span> <span class="fu">mean</span>(Operational_Cost_USD,  <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">Avg_Revenue      =</span> <span class="fu">mean</span>(Revenue_per_Voyage_USD, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">Avg_Speed        =</span> <span class="fu">mean</span>(Speed_Over_Ground_knots, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">&quot;drop&quot;</span></span>
+<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb31-10"><a href="#cb31-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="fu">starts_with</span>(<span class="st">&quot;Avg_&quot;</span>), <span class="at">names_to =</span> <span class="st">&quot;Metric&quot;</span>, <span class="at">values_to =</span> <span class="st">&quot;Value&quot;</span>)</span>
+<span id="cb31-11"><a href="#cb31-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-12"><a href="#cb31-12" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(heatmap_data, <span class="fu">aes</span>(<span class="at">x =</span> Maintenance_Status, <span class="at">y =</span> Ship_Type, <span class="at">fill =</span> Value)) <span class="sc">+</span></span>
+<span id="cb31-13"><a href="#cb31-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_tile</span>(<span class="at">color =</span> <span class="st">&quot;white&quot;</span>, <span class="at">linewidth =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb31-14"><a href="#cb31-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label =</span> <span class="fu">round</span>(Value, <span class="dv">1</span>)), <span class="at">size =</span> <span class="dv">3</span>, <span class="at">fontface =</span> <span class="st">&quot;bold&quot;</span>) <span class="sc">+</span></span>
+<span id="cb31-15"><a href="#cb31-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_viridis_c</span>(<span class="at">option =</span> <span class="st">&quot;plasma&quot;</span>) <span class="sc">+</span></span>
+<span id="cb31-16"><a href="#cb31-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span> Metric, <span class="at">scales =</span> <span class="st">&quot;free&quot;</span>) <span class="sc">+</span></span>
+<span id="cb31-17"><a href="#cb31-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;Mean Performance Metrics: Ship Type × Maintenance Status&quot;</span>,</span>
+<span id="cb31-18"><a href="#cb31-18" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">&quot;Maintenance Status&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Ship Type&quot;</span>) <span class="sc">+</span></span>
+<span id="cb31-19"><a href="#cb31-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">12</span>) <span class="sc">+</span></span>
+<span id="cb31-20"><a href="#cb31-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;bottom&quot;</span>)</span></code></pre></div>
+<p><img src="Ship_EDA_files/figure-html/multi-heatmap-shiptype-maint-1.png" alt="" width="960" style="display: block; margin: auto;" /></p>
+<hr />
+</div>
+<div id="bubble-chart-cost-vs-revenue-sized-by-cargo-coloured-by-route" class="section level2" number="8.3">
+<h2 number="8.3"><span class="header-section-number">8.3</span> 7.3 Bubble Chart: Cost vs Revenue, sized by Cargo, coloured by Route</h2>
+<div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(df, <span class="fu">aes</span>(<span class="at">x =</span> Operational_Cost_USD,</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>               <span class="at">y =</span> Revenue_per_Voyage_USD,</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>               <span class="at">size =</span> Cargo_Weight_tons,</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>               <span class="at">color =</span> Route_Type)) <span class="sc">+</span></span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.45</span>) <span class="sc">+</span></span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_size</span>(<span class="at">range =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">8</span>), <span class="at">name =</span> <span class="st">&quot;Cargo (tons)&quot;</span>) <span class="sc">+</span></span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_brewer</span>(<span class="at">palette =</span> <span class="st">&quot;Dark2&quot;</span>) <span class="sc">+</span></span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">labels =</span> <span class="fu">label_dollar</span>(<span class="at">scale =</span> <span class="fl">1e-3</span>, <span class="at">suffix =</span> <span class="st">&quot;K&quot;</span>)) <span class="sc">+</span></span>
+<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">labels =</span> <span class="fu">label_dollar</span>(<span class="at">scale =</span> <span class="fl">1e-3</span>, <span class="at">suffix =</span> <span class="st">&quot;K&quot;</span>)) <span class="sc">+</span></span>
+<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_abline</span>(<span class="at">slope =</span> <span class="dv">1</span>, <span class="at">intercept =</span> <span class="dv">0</span>, <span class="at">linetype =</span> <span class="st">&quot;dashed&quot;</span>, <span class="at">color =</span> <span class="st">&quot;black&quot;</span>) <span class="sc">+</span></span>
+<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;Cost vs Revenue — Bubble size = Cargo Weight, Colour = Route Type&quot;</span>,</span>
+<span id="cb32-12"><a href="#cb32-12" aria-hidden="true" tabindex="-1"></a>       <span class="at">subtitle =</span> <span class="st">&quot;Points above the dashed line are profitable voyages&quot;</span>,</span>
+<span id="cb32-13"><a href="#cb32-13" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">&quot;Operational Cost (USD)&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Revenue (USD)&quot;</span>,</span>
+<span id="cb32-14"><a href="#cb32-14" aria-hidden="true" tabindex="-1"></a>       <span class="at">color =</span> <span class="st">&quot;Route Type&quot;</span>) <span class="sc">+</span></span>
+<span id="cb32-15"><a href="#cb32-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">13</span>)</span></code></pre></div>
+<p><img src="Ship_EDA_files/figure-html/multi-bubble-1.png" alt="" width="960" style="display: block; margin: auto;" /></p>
+<hr />
+</div>
+<div id="faceted-ridge-plots-efficiency-by-engine-type-across-route" class="section level2" number="8.4">
+<h2 number="8.4"><span class="header-section-number">8.4</span> 7.4 Faceted Ridge Plots: Efficiency by Engine Type across Route</h2>
+<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(df <span class="sc">%&gt;%</span> <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(Route_Type)),</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>       <span class="fu">aes</span>(<span class="at">x =</span> Efficiency_nm_per_kWh, <span class="at">y =</span> Engine_Type, <span class="at">fill =</span> Engine_Type)) <span class="sc">+</span></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_density_ridges</span>(<span class="at">alpha =</span> <span class="fl">0.7</span>, <span class="at">scale =</span> <span class="fl">1.3</span>, <span class="at">rel_min_height =</span> <span class="fl">0.01</span>) <span class="sc">+</span></span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_brewer</span>(<span class="at">palette =</span> <span class="st">&quot;Set1&quot;</span>) <span class="sc">+</span></span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span> Route_Type, <span class="at">ncol =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;Fuel Efficiency Distribution: Engine Type across Route Categories&quot;</span>,</span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">&quot;Efficiency (nm/kWh)&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Engine Type&quot;</span>) <span class="sc">+</span></span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">12</span>) <span class="sc">+</span></span>
+<span id="cb33-9"><a href="#cb33-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;none&quot;</span>)</span></code></pre></div>
+<p><img src="Ship_EDA_files/figure-html/multi-ridge-efficiency-1.png" alt="" width="960" style="display: block; margin: auto;" /></p>
+<hr />
+</div>
+<div id="faceted-scatter-speed-vs-efficiency-across-maintenance-status" class="section level2" number="8.5">
+<h2 number="8.5"><span class="header-section-number">8.5</span> 7.5 Faceted Scatter: Speed vs Efficiency across Maintenance Status</h2>
+<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(df, <span class="fu">aes</span>(<span class="at">x =</span> Speed_Over_Ground_knots, <span class="at">y =</span> Efficiency_nm_per_kWh,</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>               <span class="at">color =</span> Ship_Type)) <span class="sc">+</span></span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.45</span>, <span class="at">size =</span> <span class="fl">1.5</span>) <span class="sc">+</span></span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">&quot;lm&quot;</span>, <span class="at">se =</span> <span class="cn">FALSE</span>, <span class="at">linewidth =</span> <span class="fl">0.8</span>) <span class="sc">+</span></span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_brewer</span>(<span class="at">palette =</span> <span class="st">&quot;Set2&quot;</span>) <span class="sc">+</span></span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span> Maintenance_Status, <span class="at">ncol =</span> <span class="dv">3</span>) <span class="sc">+</span></span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;Speed vs Efficiency across Maintenance Status&quot;</span>,</span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">&quot;Speed (knots)&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Efficiency (nm/kWh)&quot;</span>,</span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>       <span class="at">color =</span> <span class="st">&quot;Ship Type&quot;</span>) <span class="sc">+</span></span>
+<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">12</span>)</span></code></pre></div>
+<p><img src="Ship_EDA_files/figure-html/multi-scatter-maint-1.png" alt="" width="960" style="display: block; margin: auto;" /></p>
+<hr />
+</div>
+<div id="parallel-coordinates-plot" class="section level2" number="8.6">
+<h2 number="8.6"><span class="header-section-number">8.6</span> 7.6 Parallel Coordinates Plot</h2>
+<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>pcp_data <span class="ot">&lt;-</span> df <span class="sc">%&gt;%</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(Speed_Over_Ground_knots, Engine_Power_kW, Distance_Traveled_nm,</span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>         Cargo_Weight_tons, Operational_Cost_USD, Revenue_per_Voyage_USD,</span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>         Efficiency_nm_per_kWh, Average_Load_Percentage, Ship_Type) <span class="sc">%&gt;%</span></span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">drop_na</span>()</span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Normalize to 0-1 for parallel coordinates</span></span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a>normalize <span class="ot">&lt;-</span> <span class="cf">function</span>(x) (x <span class="sc">-</span> <span class="fu">min</span>(x)) <span class="sc">/</span> (<span class="fu">max</span>(x) <span class="sc">-</span> <span class="fu">min</span>(x))</span>
+<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a>pcp_norm <span class="ot">&lt;-</span> pcp_data <span class="sc">%&gt;%</span></span>
+<span id="cb35-11"><a href="#cb35-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">where</span>(is.numeric), normalize)) <span class="sc">%&gt;%</span></span>
+<span id="cb35-12"><a href="#cb35-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">id =</span> <span class="fu">row_number</span>())</span>
+<span id="cb35-13"><a href="#cb35-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-14"><a href="#cb35-14" aria-hidden="true" tabindex="-1"></a>pcp_long <span class="ot">&lt;-</span> pcp_norm <span class="sc">%&gt;%</span></span>
+<span id="cb35-15"><a href="#cb35-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="sc">-</span><span class="fu">c</span>(Ship_Type, id),</span>
+<span id="cb35-16"><a href="#cb35-16" aria-hidden="true" tabindex="-1"></a>               <span class="at">names_to =</span> <span class="st">&quot;Feature&quot;</span>, <span class="at">values_to =</span> <span class="st">&quot;Value&quot;</span>)</span>
+<span id="cb35-17"><a href="#cb35-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-18"><a href="#cb35-18" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(pcp_long, <span class="fu">aes</span>(<span class="at">x =</span> Feature, <span class="at">y =</span> Value, <span class="at">group =</span> id, <span class="at">color =</span> Ship_Type)) <span class="sc">+</span></span>
+<span id="cb35-19"><a href="#cb35-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="at">alpha =</span> <span class="fl">0.08</span>) <span class="sc">+</span></span>
+<span id="cb35-20"><a href="#cb35-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_brewer</span>(<span class="at">palette =</span> <span class="st">&quot;Set2&quot;</span>) <span class="sc">+</span></span>
+<span id="cb35-21"><a href="#cb35-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;Parallel Coordinates Plot — Normalised Key Features by Ship Type&quot;</span>,</span>
+<span id="cb35-22"><a href="#cb35-22" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">&quot;Feature&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Normalised Value (0-1)&quot;</span>,</span>
+<span id="cb35-23"><a href="#cb35-23" aria-hidden="true" tabindex="-1"></a>       <span class="at">color =</span> <span class="st">&quot;Ship Type&quot;</span>) <span class="sc">+</span></span>
+<span id="cb35-24"><a href="#cb35-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">12</span>) <span class="sc">+</span></span>
+<span id="cb35-25"><a href="#cb35-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">30</span>, <span class="at">hjust =</span> <span class="dv">1</span>))</span></code></pre></div>
+<p><img src="Ship_EDA_files/figure-html/multi-parallel-1.png" alt="" width="1152" style="display: block; margin: auto;" /></p>
+<hr />
+</div>
+<div id="principal-component-analysis-pre-clustering-overview" class="section level2" number="8.7">
+<h2 number="8.7"><span class="header-section-number">8.7</span> 7.7 Principal Component Analysis (Pre-Clustering Overview)</h2>
+<div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>pca_data <span class="ot">&lt;-</span> df <span class="sc">%&gt;%</span></span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="fu">all_of</span>(core_num)) <span class="sc">%&gt;%</span></span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">drop_na</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale</span>()</span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>pca_result <span class="ot">&lt;-</span> <span class="fu">prcomp</span>(pca_data, <span class="at">center =</span> <span class="cn">FALSE</span>, <span class="at">scale. =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Variance explained</span></span>
+<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a>var_exp <span class="ot">&lt;-</span> <span class="fu">summary</span>(pca_result)<span class="sc">$</span>importance[<span class="dv">2</span>, ] <span class="sc">*</span> <span class="dv">100</span></span>
+<span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-11"><a href="#cb36-11" aria-hidden="true" tabindex="-1"></a>var_df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb36-12"><a href="#cb36-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">PC =</span> <span class="fu">paste0</span>(<span class="st">&quot;PC&quot;</span>, <span class="fu">seq_along</span>(var_exp)),</span>
+<span id="cb36-13"><a href="#cb36-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">Variance =</span> var_exp,</span>
+<span id="cb36-14"><a href="#cb36-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">Cumulative =</span> <span class="fu">cumsum</span>(var_exp)</span>
+<span id="cb36-15"><a href="#cb36-15" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb36-16"><a href="#cb36-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-17"><a href="#cb36-17" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(var_df[<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>, ], <span class="fu">aes</span>(<span class="at">x =</span> PC, <span class="at">y =</span> Variance)) <span class="sc">+</span></span>
+<span id="cb36-18"><a href="#cb36-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="at">fill =</span> <span class="st">&quot;#3498db&quot;</span>, <span class="at">alpha =</span> <span class="fl">0.8</span>) <span class="sc">+</span></span>
+<span id="cb36-19"><a href="#cb36-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y =</span> Cumulative, <span class="at">group =</span> <span class="dv">1</span>), <span class="at">color =</span> <span class="st">&quot;#e74c3c&quot;</span>, <span class="at">linewidth =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb36-20"><a href="#cb36-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">y =</span> Cumulative), <span class="at">color =</span> <span class="st">&quot;#e74c3c&quot;</span>, <span class="at">size =</span> <span class="dv">3</span>) <span class="sc">+</span></span>
+<span id="cb36-21"><a href="#cb36-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">80</span>, <span class="at">linetype =</span> <span class="st">&quot;dashed&quot;</span>, <span class="at">color =</span> <span class="st">&quot;darkgreen&quot;</span>) <span class="sc">+</span></span>
+<span id="cb36-22"><a href="#cb36-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">annotate</span>(<span class="st">&quot;text&quot;</span>, <span class="at">x =</span> <span class="dv">8</span>, <span class="at">y =</span> <span class="dv">82</span>, <span class="at">label =</span> <span class="st">&quot;80% threshold&quot;</span>, <span class="at">color =</span> <span class="st">&quot;darkgreen&quot;</span>) <span class="sc">+</span></span>
+<span id="cb36-23"><a href="#cb36-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;PCA — Variance Explained per Component&quot;</span>,</span>
+<span id="cb36-24"><a href="#cb36-24" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">&quot;Principal Component&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Variance Explained (%)&quot;</span>) <span class="sc">+</span></span>
+<span id="cb36-25"><a href="#cb36-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">13</span>)</span></code></pre></div>
+<p><img src="Ship_EDA_files/figure-html/multi-pca-1.png" alt="" width="960" style="display: block; margin: auto;" /></p>
+<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="co"># PCA scatter — PC1 vs PC2</span></span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>pca_scores <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(pca_result<span class="sc">$</span>x[, <span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>])</span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>pca_scores<span class="sc">$</span>Ship_Type       <span class="ot">&lt;-</span> df<span class="sc">$</span>Ship_Type[<span class="sc">!</span><span class="fu">is.na</span>(<span class="fu">rowSums</span>(df[core_num]))]</span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>pca_scores<span class="sc">$</span>Maintenance_Status <span class="ot">&lt;-</span> df<span class="sc">$</span>Maintenance_Status[<span class="sc">!</span><span class="fu">is.na</span>(<span class="fu">rowSums</span>(df[core_num]))]</span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(pca_scores, <span class="fu">aes</span>(<span class="at">x =</span> PC1, <span class="at">y =</span> PC2, <span class="at">color =</span> Ship_Type,</span>
+<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a>                        <span class="at">shape =</span> Maintenance_Status)) <span class="sc">+</span></span>
+<span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.5</span>, <span class="at">size =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb37-9"><a href="#cb37-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_brewer</span>(<span class="at">palette =</span> <span class="st">&quot;Set2&quot;</span>) <span class="sc">+</span></span>
+<span id="cb37-10"><a href="#cb37-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;PCA Scatter — PC1 vs PC2&quot;</span>,</span>
+<span id="cb37-11"><a href="#cb37-11" aria-hidden="true" tabindex="-1"></a>       <span class="at">subtitle =</span> <span class="fu">paste0</span>(<span class="st">&quot;PC1: &quot;</span>, <span class="fu">round</span>(var_exp[<span class="dv">1</span>], <span class="dv">1</span>), <span class="st">&quot;% | PC2: &quot;</span>, <span class="fu">round</span>(var_exp[<span class="dv">2</span>], <span class="dv">1</span>), <span class="st">&quot;%&quot;</span>),</span>
+<span id="cb37-12"><a href="#cb37-12" aria-hidden="true" tabindex="-1"></a>       <span class="at">color =</span> <span class="st">&quot;Ship Type&quot;</span>, <span class="at">shape =</span> <span class="st">&quot;Maintenance Status&quot;</span>) <span class="sc">+</span></span>
+<span id="cb37-13"><a href="#cb37-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">13</span>)</span></code></pre></div>
+<p><img src="Ship_EDA_files/figure-html/pca-biplot-1.png" alt="" width="960" style="display: block; margin: auto;" /></p>
+<div class="sourceCode" id="cb38"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Loadings</span></span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>loadings_df <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(pca_result<span class="sc">$</span>rotation[, <span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>]) <span class="sc">%&gt;%</span></span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rownames_to_column</span>(<span class="st">&quot;Feature&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Magnitude =</span> <span class="fu">sqrt</span>(PC1<span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> PC2<span class="sc">^</span><span class="dv">2</span>))</span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(loadings_df, <span class="fu">aes</span>(<span class="at">x =</span> PC1, <span class="at">y =</span> PC2, <span class="at">label =</span> Feature)) <span class="sc">+</span></span>
+<span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_segment</span>(<span class="fu">aes</span>(<span class="at">xend =</span> <span class="dv">0</span>, <span class="at">yend =</span> <span class="dv">0</span>), <span class="at">arrow =</span> <span class="fu">arrow</span>(<span class="at">length =</span> <span class="fu">unit</span>(<span class="fl">0.25</span>, <span class="st">&quot;cm&quot;</span>)),</span>
+<span id="cb38-8"><a href="#cb38-8" aria-hidden="true" tabindex="-1"></a>               <span class="at">color =</span> <span class="st">&quot;#2c3e50&quot;</span>, <span class="at">linewidth =</span> <span class="fl">0.8</span>) <span class="sc">+</span></span>
+<span id="cb38-9"><a href="#cb38-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">color =</span> Magnitude), <span class="at">fontface =</span> <span class="st">&quot;bold&quot;</span>, <span class="at">size =</span> <span class="fl">3.5</span>,</span>
+<span id="cb38-10"><a href="#cb38-10" aria-hidden="true" tabindex="-1"></a>            <span class="at">hjust =</span> <span class="fu">ifelse</span>(loadings_df<span class="sc">$</span>PC1 <span class="sc">&gt;</span> <span class="dv">0</span>, <span class="sc">-</span><span class="fl">0.1</span>, <span class="fl">1.1</span>)) <span class="sc">+</span></span>
+<span id="cb38-11"><a href="#cb38-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_viridis_c</span>(<span class="at">option =</span> <span class="st">&quot;plasma&quot;</span>) <span class="sc">+</span></span>
+<span id="cb38-12"><a href="#cb38-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">0</span>, <span class="at">linetype =</span> <span class="st">&quot;dashed&quot;</span>, <span class="at">alpha =</span> <span class="fl">0.4</span>) <span class="sc">+</span></span>
+<span id="cb38-13"><a href="#cb38-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> <span class="dv">0</span>, <span class="at">linetype =</span> <span class="st">&quot;dashed&quot;</span>, <span class="at">alpha =</span> <span class="fl">0.4</span>) <span class="sc">+</span></span>
+<span id="cb38-14"><a href="#cb38-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;PCA Loadings — Feature Contributions to PC1 &amp; PC2&quot;</span>,</span>
+<span id="cb38-15"><a href="#cb38-15" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">&quot;PC1 Loading&quot;</span>, <span class="at">y =</span> <span class="st">&quot;PC2 Loading&quot;</span>) <span class="sc">+</span></span>
+<span id="cb38-16"><a href="#cb38-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">13</span>)</span></code></pre></div>
+<p><img src="Ship_EDA_files/figure-html/pca-loadings-1.png" alt="" width="960" style="display: block; margin: auto;" /></p>
+<hr />
+</div>
+</div>
+<div id="eda-summary-clustering-recommendations" class="section level1" number="9">
+<h1 number="9"><span class="header-section-number">9</span> 8. EDA Summary &amp; Clustering Recommendations</h1>
+<div id="key-findings" class="section level2" number="9.1">
+<h2 number="9.1"><span class="header-section-number">9.1</span> Key Findings</h2>
+<table>
+<colgroup>
+<col width="52%" />
+<col width="47%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Finding</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>No missing values</strong></td>
+<td>Dataset is complete — no imputation needed</td>
+</tr>
+<tr class="even">
+<td><strong>Balanced categories</strong></td>
+<td>Ship types and routes are broadly balanced</td>
+</tr>
+<tr class="odd">
+<td><strong>Wide range in efficiency</strong></td>
+<td><code>Efficiency_nm_per_kWh</code> spans ~0.05 to ~2.5 — strong clustering signal</td>
+</tr>
+<tr class="even">
+<td><strong>Cost ≠ Revenue</strong></td>
+<td>Many voyages operate below break-even; Profit_Margin varies widely</td>
+</tr>
+<tr class="odd">
+<td><strong>Weak correlations overall</strong></td>
+<td>Most numerical features have low pairwise correlation (&lt;0.3), suggesting they carry independent information — all are valuable for clustering</td>
+</tr>
+<tr class="even">
+<td><strong>PCA</strong></td>
+<td>First 4-5 PCs capture ~80% of variance; no single dominant dimension</td>
+</tr>
+<tr class="odd">
+<td><strong>Maintenance separates revenue</strong></td>
+<td>Good maintenance status aligns with higher revenue</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="recommended-features-for-clustering" class="section level2" number="9.2">
+<h2 number="9.2"><span class="header-section-number">9.2</span> Recommended Features for Clustering</h2>
+<table class="table table-striped table-hover" style="font-size: 12px; margin-left: auto; margin-right: auto;">
+<caption style="font-size: initial !important;">
+Recommended Features for Clustering
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+Feature
+</th>
+<th style="text-align:left;">
+Justification
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Speed_Over_Ground_knots
+</td>
+<td style="text-align:left;">
+Directly reflects operational tempo
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Engine_Power_kW
+</td>
+<td style="text-align:left;">
+Power consumption drives cost and CO2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Distance_Traveled_nm
+</td>
+<td style="text-align:left;">
+Core voyage scope indicator
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Draft_meters
+</td>
+<td style="text-align:left;">
+Proxy for actual load vs rated capacity
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Cargo_Weight_tons
+</td>
+<td style="text-align:left;">
+Revenue driver; varies significantly across voyages
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;background-color: rgba(213, 245, 227, 255) !important;">
+Operational_Cost_USD
+</td>
+<td style="text-align:left;font-weight: bold;background-color: rgba(213, 245, 227, 255) !important;">
+Economic health — cost efficiency cluster signal
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;background-color: rgba(213, 245, 227, 255) !important;">
+Revenue_per_Voyage_USD
+</td>
+<td style="text-align:left;font-weight: bold;background-color: rgba(213, 245, 227, 255) !important;">
+Economic health — revenue cluster signal
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Turnaround_Time_hours
+</td>
+<td style="text-align:left;">
+Port efficiency / scheduling
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;background-color: rgba(213, 245, 227, 255) !important;">
+Efficiency_nm_per_kWh
+</td>
+<td style="text-align:left;font-weight: bold;background-color: rgba(213, 245, 227, 255) !important;">
+Primary fuel performance KPI
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Seasonal_Impact_Score
+</td>
+<td style="text-align:left;">
+External context moderating all KPIs
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Weekly_Voyage_Count
+</td>
+<td style="text-align:left;">
+Throughput measure
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Average_Load_Percentage
+</td>
+<td style="text-align:left;">
+Capacity utilisation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Maintenance_Status (encoded)
+</td>
+<td style="text-align:left;">
+Condition risk factor (ordinal: 0=Good, 1=Fair, 2=Critical)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Weather_Condition (encoded)
+</td>
+<td style="text-align:left;">
+Environmental difficulty factor
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="next-steps" class="section level2" number="9.3">
+<h2 number="9.3"><span class="header-section-number">9.3</span> Next Steps</h2>
+<ol style="list-style-type: decimal">
+<li><strong>Scale features</strong> — use Z-score or min-max normalisation before clustering</li>
+<li><strong>Encode categoricals</strong> — ordinal-encode <code>Maintenance_Status</code> and <code>Weather_Condition</code></li>
+<li><strong>Determine K</strong> — use Elbow method + Silhouette score for K-Means, or dendrogram for Hierarchical clustering</li>
+<li><strong>Algorithms to try</strong> — K-Means, Hierarchical (Ward linkage), DBSCAN</li>
+<li><strong>Interpret clusters</strong> — cross-tabulate cluster assignments against <code>Ship_Type</code>, <code>Route_Type</code>, <code>Engine_Type</code> to understand each discovered archetype</li>
+</ol>
+<hr />
+<p><em>End of EDA Report</em></p>
+</div>
+</div>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("show" === "show");
+});
+</script>
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3,h4",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
